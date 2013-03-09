@@ -4,7 +4,7 @@ int cli(FILE* mainio)
 {
 	char buf[1024];
 	List<Word> *inputData;
-	Tree *my;
+	Tree *my = new Tree;
 	int i = 0;
 	while (buf[0]!='q'){
 		fprintf(stdout,"#");
@@ -15,7 +15,6 @@ int cli(FILE* mainio)
 		inputData = stringParse(buf);
 		improveInput(*inputData);
 
-		my = new Tree;
 		my->buildTree(*inputData);
 
 		std::cout << my->getTreeCharArr() << std::endl;
@@ -27,6 +26,7 @@ int cli(FILE* mainio)
 			std::cout << rez.nomerator<<'/'<<rez.denomerator << std::endl;
 		delete inputData;
 		delete my->root;
+		my->root=nullptr;
 	}
 	return 0;
 }

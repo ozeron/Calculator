@@ -88,11 +88,13 @@ Number Tree::Node::evaluteNode(Tree& dad)
 {
 	if (this->data.type == Word::cast::number)
 		return this->getValue();
-	if (this->data.type == Word::cast::variable && data.doesDataInited)
-		return this->getValue();
 	if (this->data.type == Word::cast::variable){
+
+		//TODO: Find by name, not by value!
 		List<Data>::Node* mem = dad.var.search(this->data);
-		if (mem!=nullptr &&mem->data.doesTreeInited)
+		if (mem!=nullptr &&mem->data.doesDataInited)
+			return mem->data.getValue();
+		else if (mem!=nullptr &&mem->data.doesTreeInited)
 			return mem->data.tree->EvaluteTree();
 		else{
 			this->data.doesDataInited=false;
@@ -105,8 +107,9 @@ Number Tree::Node::evaluteNode(Tree& dad)
 	}
 	if (this->data.type == Word::cast::delimiter){
 		//Special construction for "="
-		if (!strcmp(this->data.name,"="))
-			return this->assign(this->right,this->left,dad.var);
+		bool isAssign = strncmp(this->data.name,"=",1);
+		if (!isAssign)
+			return this->assign(this->right,this->left,dad);
 		Number a,b;
 
 		if(this->left!=nullptr)
@@ -211,12 +214,160 @@ bool Tree::addNode(Tree::Node* &dad, Tree::Node*node)
 
 Number Tree::EvaluteTree()
 { return this->root->evaluteNode(*this);}
-Number Tree::Node::assign(Node*l,Node* r,List<Data>& mem)
+Number Tree::Node::assign(Node*l,Node* r,Tree& tree)
 {//TODO: IMplement this!!!
 	Number result;
-	
+	if (l->data.type == Word::cast::number && r->data.type == Word::cast::number){
+		result.setValue(0,1);
+		result.ifBool = true;
+		return result;
+	}
+	if (l->data.type == Word::cast::number && r->data.type == Word::cast::delimiter){
+		result.setValue(0,1);
+		result.ifBool = true;
+		return result;
+	}
+	if (l->data.type == Word::cast::number && r->data.type == Word::cast::variable){
+		List<Data>::Node* mem = tree.var.search(r->data);
+		if (mem!=nullptr && mem->data.doesTreeInited){
+			delete mem->data.tree;
+			mem->data.doesDataInited=true;
+			mem->data.doesTreeInited=false;
+			mem->data.storedData=l->data.storedData;
+			return l->data.getValue();
+		}else if (mem!=nullptr){
+			mem->data.storedData=l->data.storedData;
+			mem->data.doesDataInited=true;
+			return l->data.getValue();
+		} else {
+			tree.var.add(r->data);
+			tree.var.head->data.storedData=l->data.storedData;
+			tree.var.head->data.doesDataInited=true;
+			tree.var.head->data.doesTreeInited=false;
+			return l->data.getValue();
+		}
+	}
+	if (l->data.type == Word::cast::delimiter && r->data.type == Word::cast::number){
+		result.setValue(0,1);
+		result.ifBool = true;
+		return result;
+	}
+	if (l->data.type == Word::cast::delimiter && r->data.type == Word::cast::delimiter){
+		result.setValue(0,1);
+		result.ifBool = true;
+		return result;
+	}
+	if (l->data.type == Word::cast::delimiter && r->data.type == Word::cast::variable){
+		List<Data>::Node* mem = tree.var.search(r->data);
+		if (mem!=nullptr && mem->data.doesTreeInited){
+			delete mem->data.tree;
+			mem->data.doesDataInited=true;
+			mem->data.doesTreeInited=false;
+			mem->data.storedData=l->evaluteNode(tree);
+			return tree.var.head->data.storedData;
+		}else if (mem!=nullptr){
+			mem->data.storedData=l->evaluteNode(tree);
+			mem->data.doesDataInited=true;
+			return tree.var.head->data.storedData;
+		} else {
+			tree.var.add(l->data);
+			tree.var.head->data.storedData=l->evaluteNode(tree);;
+			tree.var.head->data.doesDataInited=true;
+			tree.var.head->data.doesTreeInited=false;
+			return tree.var.head->data.storedData;
+		}
+	}
+	if (l->data.type == Word::cast::variable && r->data.type == Word::cast::number){
+		List<Data>::Node* mem = tree.var.search(l->data);
+		if (mem!=nullptr && mem->data.doesTreeInited){
+			delete mem->data.tree;
+			mem->data.doesDataInited=true;
+			mem->data.doesTreeInited=false;
+			mem->data.storedData=r->data.storedData;
+			return r->data.getValue();
+		}else if (mem!=nullptr){
+			mem->data.storedData=r->data.storedData;
+			mem->data.doesDataInited=true;
+			return r->data.getValue();
+		} else {
+			tree.var.add(r->data);
+			tree.var.head->data.storedData=r->data.storedData;
+			tree.var.head->data.doesDataInited=true;
+			tree.var.head->data.doesTreeInited=false;
+			return r->data.getValue();
+		}
+	}
+	if (l->data.type == Word::cast::variable && r->data.type == Word::cast::delimiter){
+		List<Data>::Node* mem = tree.var.search(l->data);
+		if (mem!=nullptr && mem->data.doesTreeInited){
+			delete mem->data.tree;
+			mem->data.doesDataInited=true;
+			mem->data.doesTreeInited=false;
+			mem->data.storedData=r->evaluteNode(tree);
+			return tree.var.head->data.storedData;
+		}else if (mem!=nullptr){
+			mem->data.storedData=r->evaluteNode(tree);
+			mem->data.doesDataInited=true;
+			return tree.var.head->data.storedData;
+		} else {
+			tree.var.add(r->data);
+			tree.var.head->data.storedData=r->evaluteNode(tree);;
+			tree.var.head->data.doesDataInited=true;
+			tree.var.head->data.doesTreeInited=false;
+			return tree.var.head->data.storedData;
+		}
+		if (l->data.type == Word::cast::variable && r->data.type == Word::cast::variable){
+			List<Data>::Node* mem1 = tree.var.search(r->data);
+			List<Data>::Node* mem2 = tree.var.search(r->data);
+			if (mem1==mem2 && mem1 == nullptr){
+				tree.var.add(l->data);
+				tree.var.head->data.storedData.setValue(0,1);
+				tree.var.head->data.doesDataInited=true;
+				tree.var.head->data.doesTreeInited=false;
+				tree.var.add(r->data);
+				tree.var.head->data.storedData.setValue(0,1);
+				tree.var.head->data.doesDataInited=true;
+				tree.var.head->data.doesTreeInited=false;
+			} else if (mem1 == mem2)
+				if (mem1->data.doesDataInited == true)
+					return mem1->data.storedData;
+				else
+					return mem2->data.tree->EvaluteTree();
+			else if (mem1 == nullptr){
+				tree.var.add(l->data);
+				if (mem2->data.doesDataInited){
+					tree.var.head->data.doesDataInited=true;
+					tree.var.head->data.storedData = mem2->data.storedData;
+				} else {
+					tree.var.head->data.doesDataInited=true;
+					tree.var.head->data.storedData = mem2->data.tree->EvaluteTree();
+				}
+			} else if (mem2 == nullptr)
+			{
+				tree.var.add(r->data);
+				if (mem1->data.doesDataInited){
+					tree.var.head->data.doesDataInited=true;
+					tree.var.head->data.storedData = mem1->data.storedData;
+				} else {
+					tree.var.head->data.doesDataInited=true;
+					tree.var.head->data.storedData = mem1->data.tree->EvaluteTree();
+				}
+			} else {
+				if (mem2->data.doesDataInited){
+					tree.var.head->data.doesDataInited=true;
+					tree.var.head->data.storedData = mem2->data.storedData;
+				} else {
+					tree.var.head->data.doesDataInited=true;
+					tree.var.head->data.storedData = mem2->data.tree->EvaluteTree();
+				}
+			}
+	}
+		
+
+		
 	return result;
 }
+
 
 bool Tree::buildTree(List<Word> &input)
 {
@@ -224,7 +375,7 @@ bool Tree::buildTree(List<Word> &input)
 		return false;
 	List<Word>::Node* currentWord;
 	currentWord = input.tail;
-	Node* nextNode, *subTreeRoot;
+	Node* nextNode=nullptr, *subTreeRoot=nullptr;
 	bool result = false;
 	while(currentWord!=nullptr)
 	{
@@ -242,10 +393,7 @@ bool Tree::buildTree(List<Word> &input)
 			continue;
 		currentWord = currentWord->next;
 	}
-	if (result)
-		return true;
-	else 
-		return false;
+	return true;
 }
 Tree::Node* Tree::buildSubTree(List<Word>::Node* &currentWord)
 {

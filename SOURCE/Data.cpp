@@ -87,7 +87,10 @@ bool Data::operator==(Data &right) const
 	bool eqData = this->storedData == right.storedData;
 	bool eqTree = this->tree == right.tree;
 	bool eqType = this->type == right.type;
-	bool eqPriority = this->priority == right.priority;
+	bool eqPriority;
+	if (this->type == Word::cast::variable)
+		return eqWord&&eqType;
+	eqPriority = this->priority == right.priority;
 	return (eqWord&&eqData&&eqTree&&eqPriority);
 }
 int Data::getPriority()

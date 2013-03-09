@@ -25,7 +25,7 @@ public:
 		bool appSon(Node* dad, Node* son);//append son
 		Number getValue();
 		Number evaluteNode(Tree&);
-		Number assign(Node*,Node*,List<Data>&);
+		Number assign(Node*,Node*,Tree&);
 		void destructNode();
 		char* getCharNode();
 		~Node();
