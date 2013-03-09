@@ -10,5 +10,7 @@ using namespace std;
 int main()
 {
 	CLITEST();
+	cout << "Hello World";
+	return 0;
 }
 
