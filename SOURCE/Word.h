@@ -21,6 +21,7 @@ public:
 	
 	Word& operator=(const Word &);
 	bool operator==(Word) const;
+	bool operator==(char*) const;
 
 	void setWord(char);
 	void setWord(char *);

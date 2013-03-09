@@ -1,8 +1,27 @@
 #include "Tree.h"
 
+bool Tree::Node::compareWithNode(Node& right) const
+{
+	bool eqLeft,eqRight,eqData;
 
+	if (this->left!=nullptr && right.left!=nullptr)
+		eqLeft = this->left->compareWithNode(*right.left);
+	else if (this->left==nullptr && right.left==nullptr)
+		eqLeft = true;
+	else 
+		eqLeft = false;
 
-Tree::Node::Node( Word input)
+	if (this->right!=nullptr && right.right!=nullptr)
+		eqRight = this->right->compareWithNode(*right.right);
+	else if (this->right==nullptr && right.right==nullptr)
+		eqRight = true;
+	else 
+		eqRight = false;
+
+	eqData = this->data == right.data;
+	return (eqLeft && eqRight && eqData);
+}
+Tree::Node::Node( Word &input)
 {
 	data = input;
 	parent = nullptr;
@@ -11,7 +30,13 @@ Tree::Node::Node( Word input)
 }
 Tree::Node::~Node()
 {
-	//TODO:Carefully delete this!
+	if (this->left!=nullptr)
+		delete left;
+	left = nullptr;
+	if (this->right!=nullptr)
+		delete right;
+	right = nullptr;
+	data.~Data();
 }
 
 bool Tree::Node::appDad(Node* dad)
@@ -55,23 +80,93 @@ bool Tree::Node::appSon(Node *dad, Node* son)
 	}
 	return true;
 }
+Number Tree::Node::getValue()
+{
+	return this->data.getValue();
+}
+Number Tree::Node::evaluteNode(Tree& dad)
+{
+	if (this->data.type == Word::cast::number)
+		return this->getValue();
+	if (this->data.type == Word::cast::variable && data.doesDataInited)
+		return this->getValue();
+	if (this->data.type == Word::cast::variable){
+		List<Data>::Node* mem = dad.var.search(this->data);
+		if (mem!=nullptr &&mem->data.doesTreeInited)
+			return mem->data.tree->EvaluteTree();
+		else{
+			this->data.doesDataInited=false;
+			this->data.doesTreeInited=false;
+			dad.var.add(this->data);
+			Number res(0,1);
+			res.decimalSystem = -1;
+			return res;
+		}
+	}
+	if (this->data.type == Word::cast::delimiter){
+		//Special construction for "="
+		if (!strcmp(this->data.name,"="))
+			return this->assign(this->right,this->left,dad.var);
+		Number a,b;
+
+		if(this->left!=nullptr)
+			a = this->left->evaluteNode(dad);
+		else
+			a.decimalSystem=-1;
+
+		if(this->right!=nullptr)
+			b = this->right->evaluteNode(dad);
+		else
+			b.decimalSystem=-1;
+		return this->data.evalute(a,b);
+	}
+	return Number(0,0);
+}
 void Tree::Node::destructNode()
 {
 	//Implementthis
 }
+char* Tree::Node::getCharNode()
+{
+	char *array=nullptr, *a=nullptr, *b = nullptr;
+	int length = 0;
+	if (this->left != nullptr)
+		a = this->left->getCharNode();
+	if (this->right!= nullptr)
+		b = this->right->getCharNode();
 
-
-
+	if (a!=nullptr)
+		length += strlen(a);
+	if (b!=nullptr)
+		length += strlen(b);
+	length += strlen(this->data.name);
+	if (a!=nullptr || b!=nullptr)
+	{
+		array = new char [length+3];// 2 = (), and 1 = '\0'
+		strcpy(array,"");
+		if (this->data.getPriority() > 11)
+			strcat(array,"(");
+		if (a!=nullptr)
+			strcat(array,a);
+		strcat(array,data.name);
+		if (b!=nullptr)
+			strcat(array,b);
+		if (this->data.getPriority() > 11)
+			strcat(array,")");
+	} else {
+		array = new char [length+1];
+		strcpy(array,this->data.name);
+	}
+	return array;
+}
 Tree::Tree(void)
 {
 	root = nullptr;
 }
 Tree::~Tree(void)
 {
-	//TODO: When finish class check Destructor!
 	delete root;
 }
-
 bool Tree::addNode(Node* node){
 	bool result;
 	if (root == nullptr){
@@ -115,28 +210,16 @@ bool Tree::addNode(Tree::Node* &dad, Tree::Node*node)
 }
 
 Number Tree::EvaluteTree()
-{ return this->root->evaluteNode();}
-
-Number Tree::Node::evaluteNode()
-{
-	if (this->data.type == Word::cast::number)
-		return this->getValue();
-	if (this->data.type == Word::cast::variable && data.doesDataInited)
-		return this->getValue();
-	if (this->data.type == Word::cast::delimiter){
-		//TODO:Implement = operator
-		Number a,b;
-		if(this->left!=nullptr)
-			a = this->left->evaluteNode();
-		if(this->right!=nullptr)
-			b = this->right->evaluteNode();
-	return this->data.evalute(a,b);
-	}
+{ return this->root->evaluteNode(*this);}
+Number Tree::Node::assign(Node*l,Node* r,List<Data>& mem)
+{//TODO: IMplement this!!!
+	Number result;
+	
+	return result;
 }
 
 bool Tree::buildTree(List<Word> &input)
 {
-	//TODO:Implement bracket  s
 	if (input.tail == nullptr)
 		return false;
 	List<Word>::Node* currentWord;
@@ -190,7 +273,7 @@ Tree::Node* Tree::buildSubTree(List<Word>::Node* &currentWord)
 	} while(nextNode->data.priority != -2 && nextNode->data.priority != 2 && nextNode->data.priority != 1);// -2 == ')'  1 == '=' 2 == ']=' || '=['
 	if (nextNode->data.priority == 2 || nextNode->data.priority == 1 && currentWord->prev!=nullptr)
 		currentWord = currentWord->prev;
-	mainRoot->data.priority = 30;
+	mainRoot->data.priority += 50;
 	return mainRoot;
 }
 
@@ -203,42 +286,11 @@ char* Tree::getTreeCharArr()
 	return outPut;
 }
 
-char* Tree::Node::getCharNode()
+bool Tree::operator==( Tree& right) const
 {
-	char *array=nullptr, *a=nullptr, *b = nullptr;
-	int length = 0;
-	if (this->left != nullptr)
-		a = this->left->getCharNode();
-	if (this->right!= nullptr)
-		b = this->right->getCharNode();
-
-	if (a!=nullptr)
-		length += strlen(a);
-	if (b!=nullptr)
-		length += strlen(b);
-	length += strlen(this->data.name);
-	if (a!=nullptr || b!=nullptr)
-	{
-		array = new char [length+3];// 2 = (), and 1 = '\0'
-		strcpy(array,"");
-		if (this->data.getPriority() > 11)
-			strcat(array,"(");
-		if (a!=nullptr)
-			strcat(array,a);
-		strcat(array,data.name);
-		if (b!=nullptr)
-			strcat(array,b);
-		if (this->data.getPriority() > 11)
-			strcat(array,")");
-	} else {
-		array = new char [length+1];
-		strcpy(array,this->data.name);
-	}
-	return array;
+	bool result = this->root->compareWithNode(*right.root);
+	return result;
 }
 
-Number Tree::Node::getValue()
-{
-	return this->data.getValue();
-}
+
 

@@ -68,7 +68,14 @@ bool Word::operator==(Word right ) const
 	else
 		return false;
 }
-
+bool Word::operator==(char *right) const
+{
+	bool eqWord = !strcmp(this->word,right);
+	if (eqWord)
+		return true;
+	else
+		return false;
+}
 void Word::setWord(char ch)
 {
 	delete word;

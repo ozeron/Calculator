@@ -18,11 +18,14 @@ public:
 
 		Node():parent(nullptr),left(nullptr),right(nullptr)
 		{};
-		Node(Word);
+		bool compareWithNode
+			(Node&) const;
+		Node(Word&);
 		bool appDad(Node* dad);//append dad
 		bool appSon(Node* dad, Node* son);//append son
 		Number getValue();
-		Number evaluteNode();
+		Number evaluteNode(Tree&);
+		Number assign(Node*,Node*,List<Data>&);
 		void destructNode();
 		char* getCharNode();
 		~Node();
@@ -31,6 +34,7 @@ public:
 	List<Data> var;
 public:
 	Tree();
+	bool operator==(Tree&) const;
 	~Tree();
 
 	bool addNode(Node*);
@@ -39,7 +43,6 @@ public:
 	Number EvaluteTree();
 	bool buildTree(List<Word> &);
 	Node* buildSubTree(List<Word>::Node* &);
-
 	char* getTreeCharArr();
 };
 

@@ -1,5 +1,15 @@
 #pragma once
-
+/*
+void add(T &d)
+void insertAfter(Node *node, T &d)
+void insertAfter(int id, T &d)
+Node* search(T goal)
+Node* at(int id)
+int getPosition(Node *goal)
+int getSize()
+bool del(Node *node)
+void delById(int id)
+*/
 #include <cstdlib>
 #if !defined(LIST)
 #define LIST
@@ -61,7 +71,7 @@ public:
 	}
 	void insertAfter(int id, T &d)
 	{
-		Node* node = this->search(at(id));
+		Node* node = this->at(id);
 		if (node == nullptr)
 			return;
 		if (node == this->head){
@@ -100,13 +110,13 @@ public:
 		}
 		return current;
 	}
-	T at(int id)
+	Node* at(int id)
 	{
 		int i = 0;
 		Node* current = tail;
 		for(;i<id;i++)
 			current = current->next;
-		return current->data;
+		return current;
 	}
 	int getPosition(Node *goal)
 	{
@@ -133,8 +143,10 @@ public:
 		}
 		return i;
 	}
-	void del(Node *node)
+	bool del(Node *node)
 	{	
+		if (node==nullptr)
+			return false;
 		if (head == node)
 			head = node->prev;
 		if (tail == node)
@@ -144,6 +156,15 @@ public:
 		if (node->prev != nullptr)
 			node->prev->next = node->next;
 		delete node;
+		return true;
+	}
+	void delById(int id)
+	{
+		int i = 0;
+		Node* current = tail;
+		for(;i<id;i++)
+			current = current->next;
+		del(current);
 	}
 };
 
