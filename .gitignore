@@ -13,10 +13,12 @@
 *.a
 Calculator/Debug
 Calculator/Release
-Calculator/*.rc
-Calculator/*.vcxproj
-Calculator/*.filters
-Calculator/*.user
+*.rc
+*.aps
+*.cd
+*.vcxproj
+*.user
+*.filters
 Debug/*
 Release/*
 *.sdf
