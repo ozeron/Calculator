@@ -1,0 +1,25 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+Calculator/Debug
+Calculator/Release
+Calculator/*.rc
+Calculator/*.vcxproj
+Calculator/*.filters
+Calculator/*.user
+Debug/*
+Release/*
+*.sdf
+*.sln
+*.suo
+*.dgml
