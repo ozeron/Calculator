@@ -25,3 +25,5 @@ Release/*
 *.sln
 *.suo
 *.dgml
+.girignore.swp
+Calculator.opensdf
