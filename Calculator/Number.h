@@ -2,6 +2,8 @@
 
 #if !defined(NUMBER)
 #define NUMBER
+#include <cstdio>
+#include <math.h>
 class Number
 {
 public:
@@ -16,6 +18,9 @@ public:
 	void setValue( long long, long long);
 	bool operator==(Number&) const;
 	void updateDecimalSystem(Number&,Number&);
+	bool printNumber(FILE *);
+	char* getNumberString();
+	char* lLong2Char(long long n);
 	~Number(void);
 };
  long long GCD( long long a, long long b);

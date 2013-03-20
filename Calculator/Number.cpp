@@ -120,7 +120,7 @@ void Number::updateDecimalSystem( Number&a,Number& b)
 		this->decimalSystem = a.decimalSystem;
 	if (a.decimalSystem == -1 && b.decimalSystem == -1)
 		this->decimalSystem = 10;
-	if (a.decimalSystem != -1 && b.decimalSystem == -1)
+	if (a.decimalSystem != -1 && b.decimalSystem != -1)
 		this->decimalSystem = a.decimalSystem;
 }
 
@@ -134,6 +134,74 @@ void Number::setValue( long long a, long long b)
 		this->denomerator/=gcd;
 	}
 	ifINF = false;
+}
+
+char* Number::getNumberString()
+{
+	char res[54](""),signum[2]("");
+	char nom[24](""),denom[24]("");
+	if (this->decimalSystem == 0)
+		return "";
+	if (this->decimalSystem == -1)
+		return "something go wrong";
+
+	if (this->ifBool)// Check BOOL
+	{
+		if (this->nomerator==0)
+			return "false";
+		else 
+			return "true";
+
+	}
+	if (static_cast<double>(nomerator)/denomerator<0) // Check signum
+		strcpy(signum,"-");
+	strcat(res,signum);
+
+	if (this->ifINF){//return iINF
+		strcat(res,"INF");
+		return res;
+	}
+
+	switch (decimalSystem){
+	case 2:strcat(res,"0b");
+		break;
+	case 8:strcat(res,"0");
+		break;
+	case 16:strcat(res,"0x");
+		break;
+	}
+	strcat(res,lLong2Char(nomerator));
+	if (denomerator!=1){
+		strcat(res,"/");
+		strcat(res,lLong2Char(denomerator));
+	}
+	return res;
+}
+
+char* Number::lLong2Char( long long n )
+{
+	char hex[][2]={"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"};
+	char reversed[24](""), normal[24]("");
+	int nextNum;
+	n=llabs(n);
+	while (n!=0){
+		nextNum = n%decimalSystem;
+		n=n/decimalSystem;
+		strcat(reversed,hex[nextNum]);
+	}
+	
+	int len = strlen(reversed);
+	for(int i=0; i<len;i++)
+		normal[i]=reversed[len-1-i];
+	return normal;
+}
+
+bool Number::printNumber( FILE * out)
+{
+	if (fprintf(out,this->getNumberString()))
+		return true;
+	else
+		return false;
 }
 
 int nextDecSystem( int a )

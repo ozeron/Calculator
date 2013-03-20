@@ -437,7 +437,8 @@ Number production( Number& a,Number& b)
 }
 Number division(Number &a,Number &b){
 	Number temp(0);
-	 long long gcd = 0;
+	long long gcd = 0;
+
 	a.nomerator = (a.decimalSystem == -1)? 1 : a.nomerator;
 	b.nomerator = (b.decimalSystem == -1)? 1 : b.nomerator;
 	temp.nomerator = a.nomerator*b.denomerator;

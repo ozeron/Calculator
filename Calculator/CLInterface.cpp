@@ -20,10 +20,10 @@ int cli(FILE* mainio)
 		std::cout << my->getTreeCharArr() << std::endl;
 		Number rez;
 		rez= my->EvaluteTree();
-		if (rez.denomerator == 1)
-			std::cout << rez.nomerator<< std::endl;
-		else 
-			std::cout << rez.nomerator<<'/'<<rez.denomerator << std::endl;
+		//rez.printNumber(stdout);
+		char out[100]("") ;
+		strcpy(out, rez.getNumberString());
+		std::cout  << out<<std::endl;
 		delete inputData;
 		delete my->root;
 		my->root=nullptr;

@@ -86,6 +86,11 @@ Number Tree::Node::getValue()
 }
 Number Tree::Node::evaluteNode(Tree& dad)
 {
+	if (this==nullptr){
+		Number res(1,0);
+		res.decimalSystem = 0;
+		return res;
+	}
 	if (this->data.type == Word::cast::number)
 		return this->getValue();
 	if (this->data.type == Word::cast::variable){
@@ -107,8 +112,10 @@ Number Tree::Node::evaluteNode(Tree& dad)
 	}
 	if (this->data.type == Word::cast::delimiter){
 		//Special construction for "="
-		bool isAssign = strncmp(this->data.name,"=",1);
-		if (!isAssign)
+		bool isAssign = !strncmp(this->data.name,"=",1);
+		if (!strncmp(this->data.name,"==",2))
+			isAssign = false;
+		if (isAssign)
 			return this->assign(this->right,this->left,dad);
 		Number a,b;
 
@@ -217,6 +224,13 @@ Number Tree::EvaluteTree()
 
 Number Tree::Node::assign(Node*r,Node* l,Tree& tree){
 	//TODO: Check bugs
+	if (l==nullptr && r!=nullptr)
+		return (r->data.doesTreeInited)? r->data.tree->EvaluteTree() : r->data.storedData;
+	if (r==nullptr && l!=nullptr)
+		return (l->data.doesTreeInited)? l->data.tree->EvaluteTree() : l->data.storedData;
+	if (l==nullptr && r==nullptr)
+		return Number(0,1);
+
 	Number result;
 	if (l->data.type == Word::cast::number && r->data.type == Word::cast::number){
 		result.setValue(0,1);
