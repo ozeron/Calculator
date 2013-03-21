@@ -25,4 +25,9 @@ Release/*
 *.sln
 *.suo
 *.dgml
+<<<<<<< HEAD
 *.opensdf
+=======
+.girignore.swp
+Calculator.opensdf
+>>>>>>> fDC
