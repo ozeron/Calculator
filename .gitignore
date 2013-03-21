@@ -25,3 +25,4 @@ Release/*
 *.sln
 *.suo
 *.dgml
+*.opensdf

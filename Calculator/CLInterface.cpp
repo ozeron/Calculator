@@ -170,7 +170,7 @@ bool improveInput(List<Word> &list)
 			list.at(i+1)->data.setType(Word::cast::delimiter);
 			i=0;
 		}
-		if (!strcmp(list.at(i)->data.word,"-") && list.at(i+1)->data.type == Word::cast::number){
+		/*if (!strcmp(list.at(i)->data.word,"-") && list.at(i+1)->data.type == Word::cast::number){
 				int numSize = strlen(list.at(i+1)->data.word)+2;
 				char *str = new char [numSize];
 				strcpy(str,list.at(i)->data.word);
@@ -181,7 +181,7 @@ bool improveInput(List<Word> &list)
 				list.del(list.at(i));
 				size--;
 				i=0;
-		}
+		}*/
 		if (list.at(i)->data.type == Word::cast::number && !strcmp(list.at(i+1)->data.word,"(")){
 			list.insertAfter(i,Word("*"));
 			list.at(i+1)->data.setType(Word::cast::delimiter);

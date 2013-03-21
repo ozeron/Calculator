@@ -410,11 +410,24 @@ Number subtraction(Number&a,Number&b){
 	Number temp(0);
 	 long long gcd = 0;
 
-	a.nomerator = (a.decimalSystem == -1)? 0 : a.nomerator;
-	b.nomerator = (b.decimalSystem == -1)? 0 : b.nomerator;
-
-	temp.nomerator = a.nomerator*b.denomerator - b.nomerator*a.denomerator;
-	temp.denomerator = a.denomerator*b.denomerator;
+	 if (a.decimalSystem == -1 && b.decimalSystem!=-1){
+		 temp.nomerator = -b.nomerator;
+		 temp.denomerator = b.denomerator;
+		 if (temp.nomerator<0 && temp.denomerator<0){
+			 temp.nomerator=-temp.nomerator;
+			 temp.denomerator=-temp.denomerator;
+		 }
+	 } else if (b.decimalSystem == -1 && a.decimalSystem!=-1){
+		 temp.nomerator = -a.nomerator;
+		 temp.denomerator = a.denomerator;
+		 if (temp.nomerator<0 && temp.denomerator<0){
+			 temp.nomerator=-temp.nomerator;
+			 temp.denomerator=-temp.denomerator;
+		 }
+	 } else {
+		temp.nomerator = a.nomerator*b.denomerator - b.nomerator*a.denomerator;
+		temp.denomerator = a.denomerator*b.denomerator;
+	 }
 	gcd = GCD(temp.nomerator, temp.denomerator);
 	temp.nomerator /= gcd;
 	temp.denomerator /= gcd;
