@@ -42,6 +42,7 @@ public:
 	bool buildTree(List<Word> &);
 	bool AltBuild(List<Word>::Node*);
 	Node* buildSubTree_(List<Word>::Node* &);
+	Node* backToPeviousSubTreeLvl(Node*&dad,List<Word>::Node* &);
 	Node* buildSubTree(List<Word>::Node* &);
 	char* getTreeCharArr();
 	

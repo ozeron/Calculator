@@ -20,7 +20,7 @@ int cli(FILE* mainio)
 		inputData = stringParse(buf);
 		improveInput(*inputData);
 
-		my->buildTree(*inputData);
+		my->AltBuild(inputData->tail);
 
 		std::cout << my->getTreeCharArr() << std::endl;
 		Number rez;
@@ -234,7 +234,7 @@ bool improveInput(List<Word> &list)
 
 void CLITEST()
 {
-	//cli(stdin);
+	cli(stdin);
 	Word a('c');
 	Word b;
 	Word c("love");

@@ -414,6 +414,7 @@ bool Tree::Node::appSonL( Node* dad, Node* son )
 
 bool Tree::buildTree(List<Word> &input)
 {
+	this->root = 0;
 	if (input.tail == nullptr)
 		return false;
 	List<Word>::Node* currentWord;
@@ -429,7 +430,7 @@ bool Tree::buildTree(List<Word> &input)
 			subTreeRoot = buildSubTree(currentWord);
 			nextNode = subTreeRoot;
 		}
-		result = addNode(nextNode);
+		result = addNode(root,nextNode);
 		if (result == false)
 			break;
 		if (currentWord == nullptr)
@@ -487,7 +488,10 @@ bool Tree::operator==( Tree& right) const
 bool Tree::AltBuild( List<Word>::Node* word)
 {
 	this->root = 0;
-	root = buildSubTree_(word);
+	addNode(this->root,buildSubTree_(word));
+	while(word != 0){
+		backToPeviousSubTreeLvl(root,word);
+	}
 	if (root != 0)
 		return true;
 	else
@@ -517,6 +521,27 @@ Tree::Node* Tree::buildSubTree_( List<Word>::Node* & word)
 	return root;
 }
 
+Tree::Node* Tree::backToPeviousSubTreeLvl( Node* &dad,List<Word>::Node* & word)
+{
+	Tree::Node* node;
+	if (word == nullptr)
+		return dad;
+	while (word != 0) {
+		if (!strncmp(word->data.word,")",1)){
+			word = word->next;
+			break;
+		}
+		if (!strncmp(word->data.word,"(",1)){
+			word = word->next;
+			node = buildSubTree_(word);
+		} else
+			node = new Tree::Node(word->data);
+		addNode(dad,node);
+		word = word->next;
+	}
+	dad->data.priority +=50;
+	return dad;
+}
 
 
 
