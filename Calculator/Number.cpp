@@ -7,7 +7,7 @@ Number::Number(void)
 	denomerator = 1;
 	decimalSystem = 10;
 	ifBool = false;
-	if (this->nomerator == INT64_MAX)
+	if (abs(abs(static_cast<double>(this->nomerator)/this->denomerator)) == INT64_MAX)
 		ifINF = true;
 	else
 		ifINF = false;
@@ -18,7 +18,7 @@ Number::Number( long long right)
 	denomerator = 1;
 	decimalSystem = 10;
 	ifBool = false;
-	if (this->nomerator == INT64_MAX)
+	if (abs(static_cast<double>(this->nomerator)/this->denomerator) == INT64_MAX)
 		ifINF = true;
 	else
 		ifINF = false;
@@ -34,7 +34,7 @@ Number::Number( long long n , long long d)
 		this->nomerator/=gcd;
 		this->denomerator/=gcd;
 	}
-	if (this->nomerator == INT64_MAX)
+	if (abs(static_cast<double>(this->nomerator)/this->denomerator) == INT64_MAX)
 		ifINF = true;
 	else
 		ifINF = false;
@@ -47,6 +47,7 @@ Number::Number(Word &right)
 	decimalSystem = 10;
 	bool minusSign = false;
 	ifBool = false;
+	ifINF = false;
 	if(right.word[i]=='-'){
 		minusSign = true;
 		i++;
@@ -92,7 +93,7 @@ Number::Number(Word &right)
 		this->nomerator/=gcd;
 		this->denomerator/=gcd;
 	}
-	if (this->nomerator == INT64_MAX)
+	if (abs(static_cast<double>(this->nomerator)/this->denomerator) == INT64_MAX)
 		ifINF = true;
 	else
 		ifINF = false;
@@ -143,7 +144,7 @@ char* Number::getNumberString()
 	if (this->decimalSystem == 0)
 		return "";
 	if (this->decimalSystem == -1)
-		return "something go wrong";
+		return "memory error";
 
 	if (this->ifBool)// Check BOOL
 	{
@@ -180,15 +181,19 @@ char* Number::getNumberString()
 
 char* Number::lLong2Char( long long n )
 {
+	if (n==INT64_MAX)
+		return "INF";
+	if (n==-INT64_MAX-1)
+		return "INF";
 	char hex[][2]={"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"};
 	char reversed[24](""), normal[24]("");
 	int nextNum;
 	n=llabs(n);
-	while (n!=0){
+	do {
 		nextNum = n%decimalSystem;
 		n=n/decimalSystem;
-		strcat(reversed,hex[nextNum]);
-	}
+		strcat(reversed,hex[abs(nextNum)]);
+	} while (n!=0);
 	
 	int len = strlen(reversed);
 	for(int i=0; i<len;i++)

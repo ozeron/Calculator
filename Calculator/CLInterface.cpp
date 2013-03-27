@@ -4,6 +4,7 @@ int cli(FILE* mainio)
 {
 	char buf[1024];
 	List<Word> *inputData;
+	List<Data> memory;
 	Tree *my = new Tree;
 	int i = 0;
 	while (buf[0]!='q'){
@@ -11,6 +12,10 @@ int cli(FILE* mainio)
 		fgets(buf,1023,mainio);
 		if (buf[0]=='q')
 			continue;
+		if (!strncmp(buf,"mem",3)){
+			memOut(stdout,memory);
+			continue;
+		}
 		//TODO: Implement all CLI commands
 		inputData = stringParse(buf);
 		improveInput(*inputData);
@@ -19,14 +24,12 @@ int cli(FILE* mainio)
 
 		std::cout << my->getTreeCharArr() << std::endl;
 		Number rez;
-		rez= my->EvaluteTree();
-		//rez.printNumber(stdout);
+		rez=my->EvaluteTree(memory);
 		char out[100]("") ;
 		strcpy(out, rez.getNumberString());
 		std::cout  << out<<std::endl;
 		delete inputData;
-		delete my->root;
-		my->root=nullptr;
+		delete my;
 	}
 	return 0;
 }
@@ -231,17 +234,36 @@ bool improveInput(List<Word> &list)
 
 void CLITEST()
 {
-	cli(stdin);
-	/*char buf[1024];
-	Tree a,b;
-	List<Word> *inputData;
-	fgets(buf,1023,stdin);
-	inputData = stringParse(buf);
-	a.buildTree(*inputData);
-	fgets(buf,1023,stdin);
-	inputData = stringParse(buf);
-	improveInput(*inputData);
-	b.buildTree(*inputData);
-	bool temp = a==b;
-	std::cout << (temp);*/
+	//cli(stdin);
+	Word a('c');
+	Word b;
+	Word c("love");
+	Word d("love",2);
+	Word e =c;
+	Word f =c;
+	e=c;
+	c=e;
+}
+
+void memOut( FILE * out, List<Data> &mem)
+{
+	if(mem.head==nullptr){
+		fprintf(out,"EMPTY\n");
+		return;
+	}
+	List<Data>::Node *current = mem.tail;
+	Data * dat = nullptr;
+	fprintf(out,"%-8s%-12s%-15s%-12s%-12s\n","Name","ifDataInit","Value","ifTreeInit","Tree Address");
+	while(current!=nullptr)
+	{
+		dat = &current->data;
+		fprintf(out,"%-8s",dat->name);	
+		fprintf(out,"%-12s",(dat->doesDataInited)?"true":"false");
+		char val[54];
+		strcpy(val,dat->storedData.getNumberString());
+		fprintf(out,"%-15s",val);
+		fprintf(out,"%-12s",(dat->doesTreeInited)?"true":"false");
+		fprintf(out,"%-12p\n",dat->tree);
+		current=current->next;
+	}
 }

@@ -418,6 +418,7 @@ Number subtraction(Number&a,Number&b){
 			 temp.denomerator=-temp.denomerator;
 		 }
 	 } else if (b.decimalSystem == -1 && a.decimalSystem!=-1){
+		 temp=a;
 		 temp.nomerator = -a.nomerator;
 		 temp.denomerator = a.denomerator;
 		 if (temp.nomerator<0 && temp.denomerator<0){
@@ -451,7 +452,11 @@ Number production( Number& a,Number& b)
 Number division(Number &a,Number &b){
 	Number temp(0);
 	long long gcd = 0;
-
+	if (b.nomerator==0){
+		temp.setValue(INT64_MAX,1);
+		temp.ifINF=true;
+		return temp;
+	}
 	a.nomerator = (a.decimalSystem == -1)? 1 : a.nomerator;
 	b.nomerator = (b.decimalSystem == -1)? 1 : b.nomerator;
 	temp.nomerator = a.nomerator*b.denomerator;
@@ -470,7 +475,10 @@ Number exponent(Number&a,Number&b){
 	a.nomerator = (a.decimalSystem == -1)? 1 : a.nomerator;
 	b.nomerator = (b.decimalSystem == -1)? 1 : b.nomerator;
 	temp = static_cast<double>(a.nomerator)/a.denomerator;
-	temp = pow(temp,static_cast<double>(b.nomerator)/b.denomerator);
+	if ((static_cast<double>(b.nomerator)/b.denomerator)<0)// Check when exponent is less then zero
+		temp = pow(temp,static_cast<double>(b.denomerator)/b.nomerator*(-1));
+	else 
+		temp = pow(temp,static_cast<double>(b.nomerator)/b.denomerator);
 	if (temp >= INT64_MAX){
 		result.nomerator=INT64_MAX;
 		result.updateDecimalSystem(a,b);
