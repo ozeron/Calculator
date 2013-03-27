@@ -5,16 +5,16 @@
 
 
 Data::Data(void){
-	name = nullptr;
+
 	doesDataInited = false;
 	tree = nullptr;
+	priority = 0;
 	doesTreeInited = false;
 	type = Word::cast::null;
 	int priority = 100;
 }
 Data::Data(Word right){
 	int wordLen = strlen(right.word);
-	this->name = new char[wordLen+1];
 	strcpy(this->name,right.word);
 	if (right.type == Word::cast::number){
 		storedData = Number(right);
@@ -30,23 +30,18 @@ Data::Data(Word right){
 	switch (right.type)
 	{
 	case Word::cast::number: priority = 29;
-						   break;
+		break;
 	case Word::cast::variable: priority = 30;
-							   break;
+		break;
 	case Word::cast::delimiter:initPriority();
-							   break;
+		break;
 	default: priority = 100;
-			 break;
+		break;
 	}
 }
 Data::Data(const Data& right)
 {
-	if (right.name!= nullptr){
-		int wSize = strlen(right.name);
-		this->name = new char [wSize+1];
-		std::strcpy(this->name,right.name);
-	} else
-		this->name = nullptr;
+	std::strcpy(this->name,right.name);
 	this->storedData = Number(right.storedData);
 	this->doesDataInited = true;
 	tree = nullptr;
@@ -55,9 +50,6 @@ Data::Data(const Data& right)
 	this->priority = right.priority;
 }
 Data::~Data(void){
-	delete [] this->name;
-	name = nullptr;
-
 	delete [] this->tree;
 	tree = nullptr;
 }
@@ -65,14 +57,7 @@ Data& Data::operator=(const Data &right)
 {
 	if(this == &right)
 		return *this;
-	
-	delete[] this->name;
-	if (right.name != nullptr){
-		int wSize = strlen(right.name);
-		this->name = new char [wSize+1];
-		std::strcpy(this->name,right.name);
-	} else
-		this->name = nullptr;
+	std::strcpy(this->name,right.name);
 	this->storedData = right.storedData;
 	this->doesDataInited = right.doesDataInited;
 	tree = nullptr;
@@ -280,10 +265,10 @@ Number Data::evalute(Number a , Number b)
 	case 25:
 	case 26:
 	case 27:this->storedData = levlNOper(a,b);
-			this->doesDataInited = true;
-			return storedData;
+		this->doesDataInited = true;
+		return storedData;
 	default:callFunc=plus;
-			break;
+		break;
 	}
 	this->storedData = (*callFunc)(a,b);
 	this->doesDataInited = true;
@@ -363,8 +348,8 @@ Number lessEq(Number&a,Number&b){
 	result = bigger(a,b);
 	if (result==Number(1,1))
 		result.setValue(0,1);
-	 else
-		 result.setValue(1,1);
+	else
+		result.setValue(1,1);
 	return result;
 }
 Number bigger(Number&a,Number&b){
@@ -393,11 +378,11 @@ Number biggerEq(Number&a,Number&b){
 Number plus(Number &a,Number &b)
 {	
 	Number temp(0);
-	 long long gcd = 0;
+	long long gcd = 0;
 
 	a.nomerator = (a.decimalSystem == -1)? 0 : a.nomerator;
 	b.nomerator = (b.decimalSystem == -1)? 0 : b.nomerator;
-	
+
 	temp.nomerator = a.nomerator*b.denomerator + b.nomerator*a.denomerator;
 	temp.denomerator = a.denomerator*b.denomerator;
 	gcd = GCD(temp.nomerator, temp.denomerator);
@@ -408,27 +393,27 @@ Number plus(Number &a,Number &b)
 }
 Number subtraction(Number&a,Number&b){
 	Number temp(0);
-	 long long gcd = 0;
+	long long gcd = 0;
 
-	 if (a.decimalSystem == -1 && b.decimalSystem!=-1){
-		 temp.nomerator = -b.nomerator;
-		 temp.denomerator = b.denomerator;
-		 if (temp.nomerator<0 && temp.denomerator<0){
-			 temp.nomerator=-temp.nomerator;
-			 temp.denomerator=-temp.denomerator;
-		 }
-	 } else if (b.decimalSystem == -1 && a.decimalSystem!=-1){
-		 temp=a;
-		 temp.nomerator = -a.nomerator;
-		 temp.denomerator = a.denomerator;
-		 if (temp.nomerator<0 && temp.denomerator<0){
-			 temp.nomerator=-temp.nomerator;
-			 temp.denomerator=-temp.denomerator;
-		 }
-	 } else {
+	if (a.decimalSystem == -1 && b.decimalSystem!=-1){
+		temp.nomerator = -b.nomerator;
+		temp.denomerator = b.denomerator;
+		if (temp.nomerator<0 && temp.denomerator<0){
+			temp.nomerator=-temp.nomerator;
+			temp.denomerator=-temp.denomerator;
+		}
+	} else if (b.decimalSystem == -1 && a.decimalSystem!=-1){
+		temp=a;
+		temp.nomerator = -a.nomerator;
+		temp.denomerator = a.denomerator;
+		if (temp.nomerator<0 && temp.denomerator<0){
+			temp.nomerator=-temp.nomerator;
+			temp.denomerator=-temp.denomerator;
+		}
+	} else {
 		temp.nomerator = a.nomerator*b.denomerator - b.nomerator*a.denomerator;
 		temp.denomerator = a.denomerator*b.denomerator;
-	 }
+	}
 	gcd = GCD(temp.nomerator, temp.denomerator);
 	temp.nomerator /= gcd;
 	temp.denomerator /= gcd;
@@ -438,7 +423,7 @@ Number subtraction(Number&a,Number&b){
 Number production( Number& a,Number& b)
 {
 	Number temp(0);
-	 long long gcd = 0;
+	long long gcd = 0;
 	a.nomerator = (a.decimalSystem == -1)? 1 : a.nomerator;
 	b.nomerator = (b.decimalSystem == -1)? 1 : b.nomerator;
 	temp.nomerator = a.nomerator*b.nomerator;
@@ -469,7 +454,7 @@ Number division(Number &a,Number &b){
 }
 Number exponent(Number&a,Number&b){
 	int dec = 1000000000;
-	 long long gcd;
+	long long gcd;
 	Number result;
 	long double temp=0;
 	a.nomerator = (a.decimalSystem == -1)? 1 : a.nomerator;

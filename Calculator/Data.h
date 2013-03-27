@@ -12,7 +12,7 @@ class  Data
 {
 
 public:
-	char* name;
+	char name[216];
 	Number storedData;
 	bool doesDataInited;
 

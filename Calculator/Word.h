@@ -9,7 +9,7 @@
 class Word
 {
 public:
-	char* word;
+	char word[216];
 	enum cast {null,variable,number,delimiter} 
 			type;
 public:
@@ -31,7 +31,6 @@ public:
 	void setType(cast);
 	cast getType(void);
 
-	~Word();
 };
 
 #endif // WORD

@@ -26,24 +26,24 @@ public:	struct Node{
 			Number getValue();
 			Number evaluteNode(List<Data>&);
 			Number assign(Node*,Node*,List<Data>&);
+			Number assign_(Node*,Node*,List<Data>&, bool);
 			char* getCharNode();
 			~Node();
 		};
 public:
 	Tree();
 	bool operator==(Tree&) const;
+	bool clearTree(void);
 	~Tree();
 	void removeNode(Node*);
 
 	bool addNode(Node*);
 	bool addNode(Node* &,Node*);//For sub trees, 
-	//were subRoot!=root
+															//were subRoot!=root
 	Number EvaluteTree(List<Data>&);
-	bool buildTree(List<Word> &);
 	bool AltBuild(List<Word>::Node*);
 	Node* buildSubTree_(List<Word>::Node* &);
 	Node* backToPeviousSubTreeLvl(Node*&dad,List<Word>::Node* &);
-	Node* buildSubTree(List<Word>::Node* &);
 	char* getTreeCharArr();
 	
 private:

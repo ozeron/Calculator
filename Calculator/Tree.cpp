@@ -37,16 +37,6 @@ Tree::Node::~Node()
 			this->parent->left = 0;
 		else 
 			this->parent->right = 0;
-
-	if (this->left!=nullptr){
-		delete left;
-	}
-	left = nullptr;
-	if (this->right!=nullptr){
-		delete right;
-	}
-	right = nullptr;
-	data.~Data();
 }
 
 bool Tree::Node::appDad(Node* dad)
@@ -142,7 +132,8 @@ Number Tree::Node::evaluteNode(List<Data> &var)
 
 char* Tree::Node::getCharNode()
 {
-	char *array=nullptr, *a=nullptr, *b = nullptr;
+	char *array, *a=nullptr, *b = nullptr;
+	array = new char[1024];
 	int length = 0;
 	if (this->left != nullptr)
 		a = this->left->getCharNode();
@@ -155,8 +146,7 @@ char* Tree::Node::getCharNode()
 		length += strlen(b);
 	length += strlen(this->data.name);
 	if (a!=nullptr || b!=nullptr)
-	{
-		array = new char [length+3];// 2 = (), and 1 = '\0'
+	{;// 2 = (), and 1 = '\0'
 		strcpy(array,"");
 		if (this->data.getPriority() > 11)
 			strcat(array,"(");
@@ -168,7 +158,6 @@ char* Tree::Node::getCharNode()
 		if (this->data.getPriority() > 11)
 			strcat(array,")");
 	} else {
-		array = new char [length+1];
 		strcpy(array,this->data.name);
 	}
 	return array;
@@ -179,8 +168,6 @@ Tree::Tree(void)
 }
 Tree::~Tree(void)
 {
-	removeNode(this->root);
-	this->root = 0;
 }
 void Tree::removeNode( Node* node)
 {
@@ -217,6 +204,9 @@ bool Tree::addNode(Tree::Node* &dad, Tree::Node*node)
 		dad = node;
 		return true;
 	}
+	if (node == nullptr){
+		return true;
+	}
 	if (dad->data.getPriority() > node->data.getPriority()){
 		result = dad->appDad(node);
 		dad=node;
@@ -233,7 +223,14 @@ bool Tree::addNode(Tree::Node* &dad, Tree::Node*node)
 }
 
 Number Tree::EvaluteTree(List<Data>& mem)
-{ return this->root->evaluteNode(mem);}
+{ 
+	Number result = this->root->evaluteNode(mem);
+	if (static_cast<double>(result.nomerator)/result.denomerator >= INT_MAX-10)
+		result.ifINF = true;
+	if (static_cast<double>(result.nomerator)/result.denomerator <=-(INT_MAX-10))
+		result.ifINF = true;
+	return result;
+}
 
 Number Tree::Node::assign(Node*r,Node* l,List<Data>& var){
 	//TODO: Check bugs
@@ -411,63 +408,16 @@ bool Tree::Node::appSonL( Node* dad, Node* son )
 		return appSon(dad,son);
 }
 
-
-bool Tree::buildTree(List<Word> &input)
+Number Tree::Node::assign_( Node*l,Node*r,List<Data>& var, bool assignLeft)
 {
-	this->root = 0;
-	if (input.tail == nullptr)
-		return false;
-	List<Word>::Node* currentWord;
-	currentWord = input.tail;
-	Node* nextNode=nullptr, *subTreeRoot=nullptr;
-	bool result = false;
-	while(currentWord!=nullptr)
-	{
-		nextNode = new Node(currentWord->data);
-		if (nextNode->data.priority == -1)
-		{
-			currentWord= currentWord->next;
-			subTreeRoot = buildSubTree(currentWord);
-			nextNode = subTreeRoot;
-		}
-		result = addNode(root,nextNode);
-		if (result == false)
-			break;
-		if (currentWord == nullptr)
-			continue;
-		currentWord = currentWord->next;
-	}
-	return true;
-}
-Tree::Node* Tree::buildSubTree(List<Word>::Node* &currentWord)
-{
-	if (currentWord == nullptr)
-		return nullptr;
-	Tree::Node *subTreeRoot=nullptr, *mainRoot=nullptr;
-	Node* nextNode;
-	nextNode = new Node(currentWord->data);
-	if (nextNode->data.priority == 2 || nextNode->data.priority == 1 && currentWord->prev!=nullptr){
-		currentWord = currentWord->prev;
-		return mainRoot;
-	}
-	do
-	{		 
-		if (nextNode->data.priority == -1)
-		{
-			currentWord= currentWord->next;
-			subTreeRoot = buildSubTree(currentWord);
-			nextNode = subTreeRoot;
-		}
-		addNode(mainRoot,nextNode);
-		if (currentWord == nullptr)
-			break;
-		currentWord = currentWord->next;
-		nextNode = new Node(currentWord->data);
-	} while(nextNode->data.priority != -2 && nextNode->data.priority != 2 && nextNode->data.priority != 1);// -2 == ')'  1 == '=' 2 == ']=' || '=['
-	if (nextNode->data.priority == 2 || nextNode->data.priority == 1 && currentWord->prev!=nullptr)
-		currentWord = currentWord->prev;
-	mainRoot->data.priority += 50;
-	return mainRoot;
+	if (l==nullptr && r!=nullptr)
+		return (r->data.doesTreeInited)? r->data.tree->EvaluteTree(var) : r->data.storedData;
+	if (r==nullptr && l!=nullptr)
+		return (l->data.doesTreeInited)? l->data.tree->EvaluteTree(var) : l->data.storedData;
+	if (l==nullptr && r==nullptr)
+		return Number(0,1);
+	Number result;
+	
 }
 
 char* Tree::getTreeCharArr()
@@ -497,7 +447,6 @@ bool Tree::AltBuild( List<Word>::Node* word)
 	else
 		return false;
 }
-
 Tree::Node* Tree::buildSubTree_( List<Word>::Node* & word)
 {
 	Tree::Node* root = 0;
@@ -512,12 +461,16 @@ Tree::Node* Tree::buildSubTree_( List<Word>::Node* & word)
 		if (!strncmp(word->data.word,"(",1)){
 			word = word->next;
 			node = buildSubTree_(word);
+			addNode(root,node);
+			continue;
 		} else
 			node = new Tree::Node(word->data);
 		addNode(root,node);
-		word = word->next;
+		if (word!= nullptr)
+			word = word->next;
 	}
-	root->data.priority +=50;
+	if (root!=nullptr)
+		root->data.priority +=50;
 	return root;
 }
 
@@ -541,6 +494,13 @@ Tree::Node* Tree::backToPeviousSubTreeLvl( Node* &dad,List<Word>::Node* & word)
 	}
 	dad->data.priority +=50;
 	return dad;
+}
+
+bool Tree::clearTree( void )
+{
+	removeNode(this->root);
+	this->root = 0;
+	return true;
 }
 
 

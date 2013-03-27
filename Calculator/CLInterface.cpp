@@ -5,13 +5,17 @@ int cli(FILE* mainio)
 	char buf[1024];
 	List<Word> *inputData;
 	List<Data> memory;
-	Tree *my = new Tree;
+	Tree my;
 	int i = 0;
 	while (buf[0]!='q'){
 		fprintf(stdout,"#");
 		fgets(buf,1023,mainio);
 		if (buf[0]=='q')
 			continue;
+		if (!strncmp(buf,"h",1)){
+			printHelp(stdout);
+			continue;
+		}
 		if (!strncmp(buf,"mem",3)){
 			memOut(stdout,memory);
 			continue;
@@ -20,16 +24,16 @@ int cli(FILE* mainio)
 		inputData = stringParse(buf);
 		improveInput(*inputData);
 
-		my->AltBuild(inputData->tail);
+		my.AltBuild(inputData->tail);
 
-		std::cout << my->getTreeCharArr() << std::endl;
+		std::cout << my.getTreeCharArr() << std::endl;
 		Number rez;
-		rez=my->EvaluteTree(memory);
+		rez=my.EvaluteTree(memory);
 		char out[100]("") ;
 		strcpy(out, rez.getNumberString());
 		std::cout  << out<<std::endl;
 		delete inputData;
-		delete my;
+		my.clearTree();
 	}
 	return 0;
 }
@@ -120,7 +124,7 @@ List<Word>* stringParse(char* arr)
 			while (i+j<size-1 && strstr(letter,subStr)!=nullptr) { 
 				j++;
 				strcpy(subStr,"");
-				strncat(subStr,arr+i,j+1);
+				strncat(subStr,arr+i+j,1);
 			}
 			strcpy(subStr,"");
 			strncat(subStr,arr+i,j);
@@ -173,18 +177,6 @@ bool improveInput(List<Word> &list)
 			list.at(i+1)->data.setType(Word::cast::delimiter);
 			i=0;
 		}
-		/*if (!strcmp(list.at(i)->data.word,"-") && list.at(i+1)->data.type == Word::cast::number){
-				int numSize = strlen(list.at(i+1)->data.word)+2;
-				char *str = new char [numSize];
-				strcpy(str,list.at(i)->data.word);
-				strcat(str,list.at(i+1)->data.word);
-				list.at(i+1)->data.setWord(str);
-				list.insertAfter(i,Word("+"));
-				list.at(i+1)->data.setType(Word::cast::delimiter);
-				list.del(list.at(i));
-				size--;
-				i=0;
-		}*/
 		if (list.at(i)->data.type == Word::cast::number && !strcmp(list.at(i+1)->data.word,"(")){
 			list.insertAfter(i,Word("*"));
 			list.at(i+1)->data.setType(Word::cast::delimiter);
@@ -203,6 +195,18 @@ bool improveInput(List<Word> &list)
 		}
 		if (!strcmp(list.at(i)->data.word,"=") &&!strcmp(list.at(i+1)->data.word,"=")){
 			list.at(i+1)->data.setWord("==");
+			list.del(list.at(i));
+			size--;
+			i=0;
+		}
+		if (!strcmp(list.at(i)->data.word,"=") &&!strcmp(list.at(i+1)->data.word,"[")){
+			list.at(i+1)->data.setWord("=[");
+			list.del(list.at(i));
+			size--;
+			i=0;
+		}
+		if (!strcmp(list.at(i)->data.word,"]") &&!strcmp(list.at(i+1)->data.word,"=")){
+			list.at(i+1)->data.setWord("]=");
 			list.del(list.at(i));
 			size--;
 			i=0;
@@ -241,8 +245,8 @@ void CLITEST()
 	Word d("love",2);
 	Word e =c;
 	Word f =c;
-	e=c;
-	c=e;
+	List<Word> list;
+
 }
 
 void memOut( FILE * out, List<Data> &mem)
@@ -266,4 +270,9 @@ void memOut( FILE * out, List<Data> &mem)
 		fprintf(out,"%-12p\n",dat->tree);
 		current=current->next;
 	}
+}
+
+void printHelp( FILE * out)
+{
+	fprintf(out,"");
 }

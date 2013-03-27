@@ -20,5 +20,6 @@ bool improveInput(List<Word> &list);
 
 void CLITEST();
 void memOut(FILE *,List<Data>&);
+void printHelp(FILE *);
 #endif
 
