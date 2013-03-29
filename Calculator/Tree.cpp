@@ -46,31 +46,31 @@ bool Node::appDad(Node* dad)
 	if (this == nullptr) {
 		return false;
 	}
-	dad->left = this;
 	this->parent = dad;
+	dad->left = this;
 	return true;
 }
 bool appSon(Node *dad, Node* son)
 {
 	Node* temp;
-	
+
 	if (dad->right == nullptr) {
-		dad->right = son;
 		son->parent = dad;
+		dad->right = son;
 		return true;
 	}																//   Implemet this:    + <- 7"28"
 	if (dad->right->data.getPriority() < son->data.getPriority()) { //					 3	  *"16" 
 		appSon(dad->right,son);								//
 	} else if (dad->right->data.getPriority() > son->data.getPriority()) {
 		temp = dad->right;											//   Implement this:   + <- *"16"
-		dad->right = son;										  	//					       3      7"28"										//
-		son = temp;
+		dad->right = son;											//					 3    7"28"
+		son->parent = dad;											//
 		appSonL(dad->right,temp);
 	} else {
-		if (dad->data.getPriority() < 19 && dad->data.getPriority()>13){
+		if (dad->right->data.getPriority() < 19 ) {
 			temp = dad->right;   // Changing places dad->right and son, 
 			dad->right = son;    // then assinging son->right value of dad->right
-			son = temp;
+			son->parent = dad;   //
 			appSon(dad->right,temp);
 		} else {
 			appSon(dad->right,son);
@@ -211,7 +211,6 @@ bool Tree::addNode(Node* &dad, Node*node)
 	if (node == nullptr){
 		return true;
 	}
-
 	if (dad->data.getPriority() > node->data.getPriority()){
 		result = dad->appDad(node);
 		dad=node;
@@ -239,10 +238,26 @@ Number Tree::EvaluteTree(List<Data>& mem)
 
 Number assign(Node*r,Node* l,List<Data>& var){
 	//TODO: Check bugs
-	if (l==nullptr && r!=nullptr)
+	if (l==nullptr && r!=nullptr){
+		if (r->data.type == Word::variable)
+		{
+			List<Data>::Node* mem = var.search(r->data);
+			if (mem!=nullptr){
+				return mem->data.tree->evaluteNode(var);
+			}
+		}
 		return (r->data.doesTreeInited)? r->data.tree->evaluteNode(var) : r->data.storedData;
-	if (r==nullptr && l!=nullptr)
+	}
+	if (r==nullptr && l!=nullptr){
+		if (l->data.type == Word::variable)
+		{
+			List<Data>::Node* mem = var.search(l->data);
+			if (mem!=nullptr){
+				return mem->data.tree->evaluteNode(var);
+			}
+		}
 		return (l->data.doesTreeInited)? l->data.tree->evaluteNode(var) : l->data.storedData;
+	}
 	if (l==nullptr && r==nullptr)
 		return Number(0,1);
 	Number result;
@@ -263,7 +278,10 @@ Number assign(Node*r,Node* l,List<Data>& var){
 		if (mem!=nullptr){
 			mem->data.doesDataInited=false;
 			mem->data.doesTreeInited=true;
-			*mem->data.tree = *r;
+			if (mem->data.tree != r){
+				mem->data.tree->cutNode();
+				mem->data.tree = r;
+			}
 			return r->evaluteNode(var);
 		} else {
 			var.add(l->data);
@@ -280,7 +298,10 @@ Number assign(Node*r,Node* l,List<Data>& var){
 		List<Data>::Node* mem = var.search(l->data);
 		if (mem!=nullptr){
 			mem->data.doesTreeInited=true;
-			*mem->data.tree = *r;
+			if (mem->data.tree != r){
+				mem->data.tree->cutNode();
+				mem->data.tree = r;
+			}
 			return r->evaluteNode(var);
 		} else {
 			var.add(l->data);
@@ -295,11 +316,9 @@ Number assign(Node*r,Node* l,List<Data>& var){
 		List<Data>::Node* mem2 = var.search(r->data);
 		if (mem1==mem2 && mem1 == nullptr){
 			var.add(l->data);
-			var.head->data.storedData.setValue(0,1);
 			var.head->data.doesDataInited=false;
 			var.head->data.doesTreeInited=false;
 			var.add(r->data);
-			var.head->data.storedData.setValue(0,1);
 			var.head->data.doesDataInited=false;
 			var.head->data.doesTreeInited=false;
 			return Number(0,1);
@@ -312,7 +331,7 @@ Number assign(Node*r,Node* l,List<Data>& var){
 				var.add(l->data);
 				if (mem2->data.doesTreeInited){
 					var.head->data.doesDataInited=false;
-					appSon(var.head->data.tree,mem2->data.tree);
+					var.head->data.tree = r;
 					return var.head->data.tree->evaluteNode(var);
 				} else {
 					var.head->data.doesDataInited=true;
@@ -323,8 +342,7 @@ Number assign(Node*r,Node* l,List<Data>& var){
 				var.add(r->data);
 				if (mem1->data.doesTreeInited){
 					var.head->data.doesDataInited=false;
-					delete var.head->data.tree;
-					var.head->data.tree = mem1->data.tree;
+					var.head->data.tree = l;
 					return var.head->data.tree->evaluteNode(var);
 				} else {
 					var.head->data.doesDataInited=true;
@@ -332,11 +350,10 @@ Number assign(Node*r,Node* l,List<Data>& var){
 					return var.head->data.storedData;
 				}
 		} else { // if two variables inited assign left to the right
-				var.add(r->data);
-				if (mem2->data.doesTreeInited){
-					var.head->data.doesDataInited=false;
+				if (mem1->data.doesTreeInited=true){
 					//delete var.head->data.tree;
-					var.head->data.tree = mem2->data.tree;
+					mem1->data.tree->cutNode();
+					mem1->data.tree = r;
 					return var.head->data.tree->evaluteNode(var);
 				} else {
 					mem1->data.doesDataInited=true;
@@ -362,6 +379,18 @@ void Node::removeNods()
 {
 	if (this == 0)
 		return;
+	delete this;
+}
+
+void Node::cutNode()
+{
+	if (this->parent != nullptr)
+		this->parent->right = nullptr;
+	
+	if (this->left != nullptr)
+		this->left->parent = nullptr;
+	if (this->right != nullptr)
+		this->right->parent = nullptr;
 	delete this;
 }
 

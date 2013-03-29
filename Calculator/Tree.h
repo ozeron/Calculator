@@ -18,6 +18,7 @@ struct Node{
 	bool appDad(Node* dad);//append dad
 	Number getValue();
 	Number evaluteNode(List<Data>&);
+	void cutNode();
 	void removeNods();
 	char* getCharNode();
 };

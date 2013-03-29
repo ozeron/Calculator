@@ -149,7 +149,8 @@ char* Number::getNumberString()
 		return "";
 	if (this->ifInited == -1)
 		return "mem_undef";
-
+	if (this->nomerator == this->denomerator && this->nomerator == 0)
+		return "undef";
 	if (this->ifBool)// Check BOOL
 	{
 		if (this->nomerator==0)
