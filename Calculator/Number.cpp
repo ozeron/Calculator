@@ -7,6 +7,7 @@ Number::Number(void)
 	denomerator = 1;
 	decimalSystem = 10;
 	ifBool = false;
+	ifInited = false;
 	if (abs(abs(static_cast<double>(this->nomerator)/this->denomerator)) == INT64_MAX)
 		ifINF = true;
 	else
@@ -18,6 +19,7 @@ Number::Number( long long right)
 	denomerator = 1;
 	decimalSystem = 10;
 	ifBool = false;
+	ifInited = true;
 	if (abs(static_cast<double>(this->nomerator)/this->denomerator) == INT64_MAX)
 		ifINF = true;
 	else
@@ -29,6 +31,7 @@ Number::Number( long long n , long long d)
 	denomerator = d;
 	decimalSystem = 10;
 	ifBool = false;
+	ifInited = true;
 	long long gcd = GCD(this->nomerator,this->denomerator);
 	if (gcd!=0){
 		this->nomerator/=gcd;
@@ -97,6 +100,7 @@ Number::Number(Word &right)
 		ifINF = true;
 	else
 		ifINF = false;
+	ifInited = true;
 }
 
 Number::~Number(void)
@@ -143,8 +147,8 @@ char* Number::getNumberString()
 	char nom[24](""),denom[24]("");
 	if (this->decimalSystem == 0)
 		return "";
-	if (this->decimalSystem == -1)
-		return "memory error";
+	if (this->ifInited == -1)
+		return "mem_undef";
 
 	if (this->ifBool)// Check BOOL
 	{

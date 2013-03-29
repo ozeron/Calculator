@@ -5,15 +5,15 @@
 
 
 Data::Data(void){
-
-	doesDataInited = false;
 	tree = nullptr;
+	doesDataInited = false;
 	priority = 0;
 	doesTreeInited = false;
 	type = Word::cast::null;
 	int priority = 100;
 }
 Data::Data(Word right){
+	tree = new Node;
 	int wordLen = strlen(right.word);
 	strcpy(this->name,right.word);
 	if (right.type == Word::cast::number){
@@ -24,7 +24,6 @@ Data::Data(Word right){
 		storedData.decimalSystem = -1;
 		doesDataInited = false;
 	}
-	tree = nullptr;
 	doesTreeInited = false;
 	this->type = right.type;
 	switch (right.type)
@@ -41,16 +40,16 @@ Data::Data(Word right){
 }
 Data::Data(const Data& right)
 {
+	tree = new Node;
 	std::strcpy(this->name,right.name);
 	this->storedData = Number(right.storedData);
 	this->doesDataInited = true;
-	tree = nullptr;
 	doesTreeInited = false;
 	this->type = right.type;
 	this->priority = right.priority;
 }
 Data::~Data(void){
-	delete [] this->tree;
+	delete tree;
 	tree = nullptr;
 }
 Data& Data::operator=(const Data &right)
@@ -60,7 +59,6 @@ Data& Data::operator=(const Data &right)
 	std::strcpy(this->name,right.name);
 	this->storedData = right.storedData;
 	this->doesDataInited = right.doesDataInited;
-	tree = nullptr;
 	doesTreeInited = false;
 	this->type = right.type;
 	this->priority = right.priority;

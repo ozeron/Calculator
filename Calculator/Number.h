@@ -9,7 +9,7 @@ class Number
 public:
 	long long nomerator, denomerator;
 	int decimalSystem;
-	bool ifINF, ifBool;
+	bool ifINF, ifBool, ifInited;
 public:
 	Number();
 	Number( long long);

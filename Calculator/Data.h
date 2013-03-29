@@ -7,7 +7,7 @@
 #define DATA
 #define INT64_MAX 9223372036854775807
 class Tree;
-
+struct Node;
 class  Data
 {
 
@@ -16,7 +16,7 @@ public:
 	Number storedData;
 	bool doesDataInited;
 
-	Tree *tree;
+	Node *tree;
 	bool doesTreeInited;
 
 	Word::cast type;

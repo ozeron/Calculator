@@ -5,9 +5,11 @@ int cli(FILE* mainio)
 	char buf[1024];
 	List<Word> *inputData;
 	List<Data> memory;
-	Tree my;
+	Tree *my;
 	int i = 0;
 	while (buf[0]!='q'){
+		my = new Tree;
+		
 		fprintf(stdout,"#");
 		fgets(buf,1023,mainio);
 		if (buf[0]=='q')
@@ -24,16 +26,15 @@ int cli(FILE* mainio)
 		inputData = stringParse(buf);
 		improveInput(*inputData);
 
-		my.AltBuild(inputData->tail);
-
-		std::cout << my.getTreeCharArr() << std::endl;
+		my->AltBuild(inputData->tail);
+		Node *p = my->root;
+		std::cout << my->getTreeCharArr() << std::endl;
 		Number rez;
-		rez=my.EvaluteTree(memory);
+		rez=my->EvaluteTree(memory);
 		char out[100]("") ;
 		strcpy(out, rez.getNumberString());
 		std::cout  << out<<std::endl;
 		delete inputData;
-		my.clearTree();
 	}
 	return 0;
 }
@@ -256,15 +257,16 @@ void memOut( FILE * out, List<Data> &mem)
 		return;
 	}
 	List<Data>::Node *current = mem.tail;
+	Number memVal;
 	Data * dat = nullptr;
-	fprintf(out,"%-8s%-12s%-15s%-12s%-12s\n","Name","ifDataInit","Value","ifTreeInit","Tree Address");
+	fprintf(out,"%-8s%-15s%-12s%-12s\n","Name","Value","ifTreeInit","Tree Address");
 	while(current!=nullptr)
 	{
 		dat = &current->data;
 		fprintf(out,"%-8s",dat->name);	
-		fprintf(out,"%-12s",(dat->doesDataInited)?"true":"false");
 		char val[54];
-		strcpy(val,dat->storedData.getNumberString());
+		memVal = dat->tree->evaluteNode(mem);
+		strcpy(val,memVal.getNumberString());
 		fprintf(out,"%-15s",val);
 		fprintf(out,"%-12s",(dat->doesTreeInited)?"true":"false");
 		fprintf(out,"%-12p\n",dat->tree);
@@ -274,5 +276,9 @@ void memOut( FILE * out, List<Data> &mem)
 
 void printHelp( FILE * out)
 {
-	fprintf(out,"");
+
+	fprintf(out,"Type exspression in single row, you can use variables, they defined when you first time call variable;\n");
+	;
+	fprintf(out,"Type \"mem\" to see memory state.\n");
+	fprintf(out,"Press \"q\" for exit.\n");
 }
