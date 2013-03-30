@@ -52,4 +52,6 @@ Number remainder(Number&,Number&);
 
 Number recLevNOper(Number&,Number&,int);
 
+Number plusINF(Number &,Number&);
+
 #endif 

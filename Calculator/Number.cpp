@@ -8,6 +8,7 @@ Number::Number(void)
 	decimalSystem = 10;
 	ifBool = false;
 	ifInited = false;
+	ifNumber = true;
 	if (abs(abs(static_cast<double>(this->nomerator)/this->denomerator)) == INT64_MAX)
 		ifINF = true;
 	else
@@ -20,6 +21,7 @@ Number::Number( long long right)
 	decimalSystem = 10;
 	ifBool = false;
 	ifInited = true;
+	ifNumber = true;
 	if (abs(static_cast<double>(this->nomerator)/this->denomerator) == INT64_MAX)
 		ifINF = true;
 	else
@@ -32,6 +34,7 @@ Number::Number( long long n , long long d)
 	decimalSystem = 10;
 	ifBool = false;
 	ifInited = true;
+	ifNumber = true;
 	long long gcd = GCD(this->nomerator,this->denomerator);
 	if (gcd!=0){
 		this->nomerator/=gcd;
@@ -51,6 +54,7 @@ Number::Number(Word &right)
 	bool minusSign = false;
 	ifBool = false;
 	ifINF = false;
+	ifNumber = true;
 	if(right.word[i]=='-'){
 		minusSign = true;
 		i++;
@@ -76,6 +80,15 @@ Number::Number(Word &right)
 		i+=2;
 	}
 	int nextNum = 0;
+	if (strstr("INF0bINF,0INF,0xINF",right.word+i)!=0){
+		this->nomerator = INT64_MAX;
+		this->denomerator = 1;
+		decimalSystem=10;
+		ifINF = true;
+		ifInited = true;
+		return;
+	}
+
 	while (right.word[i]!='\0')
 	{
 		a = (right.word[i]-48<=9)?48:55;
@@ -119,11 +132,11 @@ bool Number::operator==( Number& right) const
 
 void Number::updateDecimalSystem( Number&a,Number& b)
 {
-	if (a.decimalSystem == -1)
+	if (a.decimalSystem < -1)
 		this->decimalSystem = b.decimalSystem;
-	if (b.decimalSystem == -1)
+	if (b.decimalSystem < -1)
 		this->decimalSystem = a.decimalSystem;
-	if (a.decimalSystem == -1 && b.decimalSystem == -1)
+	if (a.decimalSystem < -1 && b.decimalSystem < -1)
 		this->decimalSystem = 10;
 	if (a.decimalSystem != -1 && b.decimalSystem != -1)
 		this->decimalSystem = a.decimalSystem;
@@ -186,6 +199,8 @@ char* Number::getNumberString()
 
 char* Number::lLong2Char( long long n )
 {
+	if (decimalSystem < 0)
+		decimalSystem = 10;
 	if (n==INT64_MAX)
 		return "INF";
 	if (n==-INT64_MAX-1)

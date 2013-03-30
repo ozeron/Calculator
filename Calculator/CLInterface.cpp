@@ -47,7 +47,7 @@ List<Word>* stringParse(char* arr)
 	char* more  = ",=()[]";
 	char* dump  = " _#$~`\";{}\\.\n\t";
 	char* numb  = "0123456789";
-	char* letter= "abcdefghjklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	char* letter= "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	char *subStr = new char[1024];
 	List<Word> *list = new List<Word>();
@@ -131,6 +131,8 @@ List<Word>* stringParse(char* arr)
 			strncat(subStr,arr+i,j);
 			next = new Word (subStr);
 			type = Word::variable;
+			if (strstr("-INF",subStr)!=nullptr)
+				type = Word::number;
 			next->setType(type);            // add to word
 			list->add(*next);
 			delete next;
@@ -228,7 +230,7 @@ bool improveInput(List<Word> &list)
 			i=0;
 		}
 		if (!strcmp(list.at(i)->data.word,"*") &&!strcmp(list.at(i+1)->data.word,"*")){
-			list.at(i+1)->data.setWord("^");
+			list.at(i+1)->data.setWord("**");
 			list.del(list.at(i));
 			size--;
 			i=0;
@@ -259,7 +261,7 @@ void memOut( FILE * out, List<Data> &mem)
 	List<Data>::Node *current = mem.tail;
 	Number memVal;
 	Data * dat = nullptr;
-	fprintf(out,"%-8s%-15s%-12s%-12s\n","Name","Value","ifTreeInit","Tree Address");
+	fprintf(out,"%-8s%-20s%-12s%-12s\n","Name","Value","ifTreeInit","Tree Address");
 	while(current!=nullptr)
 	{
 		dat = &current->data;
@@ -267,7 +269,7 @@ void memOut( FILE * out, List<Data> &mem)
 		char val[54];
 		memVal = dat->tree->evaluteNode(mem);
 		strcpy(val,memVal.getNumberString());
-		fprintf(out,"%-15s",val);
+		fprintf(out,"%-20s",val);
 		fprintf(out,"%-12s",(dat->doesTreeInited)?"true":"false");
 		fprintf(out,"%-12p\n",dat->tree);
 		current=current->next;
@@ -278,7 +280,9 @@ void printHelp( FILE * out)
 {
 
 	fprintf(out,"Type exspression in single row, you can use variables, they defined when you first time call variable;\n");
-	;
+	fprintf(out,"Calculator support different decimal systems: binary(\"0b\"), oct(\"0b\"), dec(standart) and hex(\"0x\")\n");
+	
+	fprintf(out,"Press \"h\" for help");
 	fprintf(out,"Type \"mem\" to see memory state.\n");
 	fprintf(out,"Press \"q\" for exit.\n");
 }

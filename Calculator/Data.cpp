@@ -13,7 +13,7 @@ Data::Data(void){
 	int priority = 100;
 }
 Data::Data(Word right){
-	tree = new Node;
+	tree = nullptr;
 	int wordLen = strlen(right.word);
 	strcpy(this->name,right.word);
 	if (right.type == Word::cast::number){
@@ -40,7 +40,7 @@ Data::Data(Word right){
 }
 Data::Data(const Data& right)
 {
-	tree = new Node;
+	tree = right.tree;
 	std::strcpy(this->name,right.name);
 	this->storedData = Number(right.storedData);
 	this->doesDataInited = true;
@@ -183,6 +183,10 @@ void Data::initPriority()
 		return;
 	}
 	if (!strcmp(name,"^")){
+		priority = 21;
+		return;
+	}	 
+	if (!strcmp(name,"**")){
 		priority = 21;
 		return;
 	}	 
@@ -377,10 +381,12 @@ Number plus(Number &a,Number &b)
 {	
 	Number temp(0);
 	long long gcd = 0;
-
-	a.nomerator = (a.decimalSystem == -1)? 0 : a.nomerator;
-	b.nomerator = (b.decimalSystem == -1)? 0 : b.nomerator;
-
+	a.nomerator = (a.decimalSystem < 0)? 0 : a.nomerator;
+	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
+	b.nomerator = (b.decimalSystem < 0)? 0 : b.nomerator;
+	b.denomerator = (b.decimalSystem < 0)? 1 : b.denomerator;
+	if (a.ifINF || b.ifINF)
+		return plusINF(a,b);
 	temp.nomerator = a.nomerator*b.denomerator + b.nomerator*a.denomerator;
 	temp.denomerator = a.denomerator*b.denomerator;
 	gcd = GCD(temp.nomerator, temp.denomerator);
@@ -393,14 +399,14 @@ Number subtraction(Number&a,Number&b){
 	Number temp(0);
 	long long gcd = 0;
 
-	if (a.decimalSystem == -1 && b.decimalSystem!=-1){
+	if (a.decimalSystem < 0 && b.decimalSystem!=-1){
 		temp.nomerator = -b.nomerator;
 		temp.denomerator = b.denomerator;
 		if (temp.nomerator<0 && temp.denomerator<0){
 			temp.nomerator=-temp.nomerator;
 			temp.denomerator=-temp.denomerator;
 		}
-	} else if (b.decimalSystem == -1 && a.decimalSystem!=-1){
+	} else if (b.decimalSystem < 0 && a.decimalSystem!=-1){
 		temp=a;
 		temp.nomerator = -a.nomerator;
 		temp.denomerator = a.denomerator;
@@ -422,8 +428,12 @@ Number production( Number& a,Number& b)
 {
 	Number temp(0);
 	long long gcd = 0;
-	a.nomerator = (a.decimalSystem == -1)? 1 : a.nomerator;
-	b.nomerator = (b.decimalSystem == -1)? 1 : b.nomerator;
+	a.nomerator = (a.decimalSystem < 0)? 1 : a.nomerator;
+	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
+	b.nomerator = (b.decimalSystem < 0)? 1 : b.nomerator;
+	b.denomerator = (b.decimalSystem < 0)? 1 : b.denomerator;
+
+
 	temp.nomerator = a.nomerator*b.nomerator;
 	temp.denomerator = a.denomerator*b.denomerator;
 	gcd = GCD(temp.nomerator, temp.denomerator);
@@ -440,8 +450,17 @@ Number division(Number &a,Number &b){
 		temp.ifINF=true;
 		return temp;
 	}
-	a.nomerator = (a.decimalSystem == -1)? 1 : a.nomerator;
-	b.nomerator = (b.decimalSystem == -1)? 1 : b.nomerator;
+
+	if (a.ifINF && b.ifINF)
+	{
+		temp.ifNumber=false;
+		return temp;
+	}
+	a.nomerator = (a.decimalSystem < 0)? 1 : a.nomerator;
+	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
+	b.nomerator = (b.decimalSystem < 0)? 1 : b.nomerator;
+	b.denomerator = (b.decimalSystem < 0)? 1 : b.denomerator;
+
 	temp.nomerator = a.nomerator*b.denomerator;
 	temp.denomerator = a.denomerator*b.nomerator;
 	gcd = GCD(temp.nomerator, temp.denomerator);
@@ -455,8 +474,18 @@ Number exponent(Number&a,Number&b){
 	long long gcd;
 	Number result;
 	long double temp=0;
-	a.nomerator = (a.decimalSystem == -1)? 1 : a.nomerator;
-	b.nomerator = (b.decimalSystem == -1)? 1 : b.nomerator;
+	a.nomerator = (a.decimalSystem < 0)? 1 : a.nomerator;
+	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
+	b.nomerator = (b.decimalSystem < 0)? 1 : b.nomerator;
+	b.denomerator = (b.decimalSystem < 0)? 1 : b.denomerator;
+
+	if (a.ifINF || b.ifINF)
+	{
+		result.setValue(INT64_MAX,1);
+		result.ifINF = true;
+		return result;
+	}
+
 	temp = static_cast<double>(a.nomerator)/a.denomerator;
 	if ((static_cast<double>(b.nomerator)/b.denomerator)<0)// Check when exponent is less then zero
 		temp = pow(temp,static_cast<double>(b.denomerator)/b.nomerator*(-1));
@@ -498,8 +527,12 @@ Number exponent(Number&a,Number&b){
 }
 Number remainder(Number&a,Number&b){
 	Number temp;
-	a.nomerator = (a.decimalSystem == -1)? 1 : a.nomerator;
-	b.nomerator = (b.decimalSystem == -1)? 1 : b.nomerator;
+	a.nomerator = (a.decimalSystem < 0)? 1 : a.nomerator;
+	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
+	b.nomerator = (b.decimalSystem < 0)? 1 : b.nomerator;
+	b.denomerator = (b.decimalSystem < 0)? 1 : b.denomerator;
+	if (a.ifINF && b.nomerator==0)
+		return a;
 	temp.denomerator = 1;
 	temp.nomerator = (int)(float(a.nomerator/a.denomerator)/float(b.nomerator/b.denomerator));
 	temp.nomerator *= float(b.nomerator/b.denomerator);
@@ -517,8 +550,10 @@ Number Data::levlNOper(Number& a ,Number& b)
 
 Number recLevNOper( Number& a,Number& b, int n)
 {
-	a.nomerator = (a.decimalSystem == -1)? 1 : a.nomerator;
-	b.nomerator = (b.decimalSystem == -1)? 1 : b.nomerator;
+	a.nomerator = (a.decimalSystem < 0)? 1 : a.nomerator;
+	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
+	b.nomerator = (b.decimalSystem < 0)? 1 : b.nomerator;
+	b.denomerator = (b.decimalSystem < 0)? 1 : b.denomerator;
 	Number temp = a;
 	if (n==3)
 		return exponent(a,b);
@@ -528,4 +563,9 @@ Number recLevNOper( Number& a,Number& b, int n)
 	for(int i=0;i<amount;i++)
 		temp = recLevNOper(temp,temp,n-1);
 	return recLevNOper(a,temp,n-1);
+}
+
+Number plusINF( Number &,Number& )
+{
+	return Number();
 }
