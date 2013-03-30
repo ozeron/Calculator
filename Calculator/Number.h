@@ -16,9 +16,11 @@ public:
 	Number( long long, long long);
 	Number(Word&);
 	void setValue( long long, long long);
-	bool operator==(Number&) const;
-	void updateDecimalSystem(Number&,Number&);
+	bool operator==(Number &) const;
+	void updateDecimalSystem(Number ,Number );
 	bool printNumber(FILE *);
+	double convertToDouble();
+	void changeSignum();
 	char* getNumberString();
 	char* lLong2Char(long long n);
 	~Number(void);

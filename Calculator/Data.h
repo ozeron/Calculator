@@ -33,25 +33,25 @@ public:
 	Number getValue();
 	Word::cast getType();
 	Number evalute(Number, Number);
-	Number levlNOper(Number&,Number&);
+	Number levlNOper(Number,Number);
 };
-Number and(Number&,Number&);
-Number or(Number&,Number&);
-Number equal(Number&,Number&);
-Number notEqual(Number&,Number&);
-Number less(Number&,Number&);
-Number lessEq(Number&,Number&);
-Number bigger(Number&,Number&);
-Number biggerEq(Number&,Number&);
-Number plus(Number&,Number&);
-Number subtraction(Number&,Number&);
-Number production(Number&,Number&);
-Number division(Number&,Number&);
-Number exponent(Number&,Number&);
-Number remainder(Number&,Number&);
+Number and(Number,Number);
+Number or(Number,Number);
+Number equal(Number,Number);
+Number notEqual(Number,Number);
+Number less(Number,Number);
+Number lessEq(Number,Number);
+Number bigger(Number,Number);
+Number biggerEq(Number,Number);
+Number plus(Number,Number);
+Number subtraction(Number,Number);
+Number production(Number,Number);
+Number division(Number,Number);
+Number exponent(Number,Number);
+Number remainder(Number,Number);
 
-Number recLevNOper(Number&,Number&,int);
+Number recLevNOper(Number,Number,int);
 
-Number plusINF(Number &,Number&);
+Number plusINF(Number,Number);
 
 #endif 

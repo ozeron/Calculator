@@ -299,7 +299,9 @@ Number assign(Node*r,Node* l,List<Data>& var){
 		if (mem!=nullptr){
 			mem->data.doesDataInited=false;
 			mem->data.doesTreeInited=true;
-			if (mem->data.tree != r){
+			if (mem->data.tree == 0){
+					mem->data.tree = r;
+			} else if (mem->data.tree != r){
 				mem->data.tree->cutNode();
 				mem->data.tree = r;
 			}
@@ -319,7 +321,9 @@ Number assign(Node*r,Node* l,List<Data>& var){
 		List<Data>::Node* mem = var.search(l->data);
 		if (mem!=nullptr){
 			mem->data.doesTreeInited=true;
-			if (mem->data.tree != r){
+			if (mem->data.tree == 0){
+				mem->data.tree = r;
+			} else if (mem->data.tree != r){
 				mem->data.tree->cutNode();
 				mem->data.tree = r;
 			}
@@ -339,9 +343,12 @@ Number assign(Node*r,Node* l,List<Data>& var){
 			var.add(l->data);
 			var.head->data.doesDataInited=false;
 			var.head->data.doesTreeInited=false;
-			var.add(r->data);
-			var.head->data.doesDataInited=false;
-			var.head->data.doesTreeInited=false;
+			if (strcmp(l->data.name,r->data.name)){
+				var.add(r->data);
+				var.head->data.doesDataInited=false;
+				var.head->data.doesTreeInited=false;
+				var.head->prev->data.tree = r;
+			}
 			Number ret(0,0);
 			ret.decimalSystem = -2;
 			return ret;
@@ -409,6 +416,8 @@ void Node::removeNods()
 
 void Node::cutNode()
 {
+	if (this == nullptr)
+		return;
 	if (this->parent != nullptr)
 		this->parent->right = nullptr;
 	

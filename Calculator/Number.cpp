@@ -120,7 +120,7 @@ Number::~Number(void)
 {
 }
 
-bool Number::operator==( Number& right) const
+bool Number::operator==( Number & right) const
 {
 	bool eqNomerator = this->nomerator==right.nomerator;
 	bool eqDenomerator = this->denomerator==right.denomerator;
@@ -130,7 +130,7 @@ bool Number::operator==( Number& right) const
 		return false;
 }
 
-void Number::updateDecimalSystem( Number&a,Number& b)
+void Number::updateDecimalSystem( Number a,Number  b)
 {
 	if (a.decimalSystem < -1)
 		this->decimalSystem = b.decimalSystem;
@@ -158,12 +158,15 @@ char* Number::getNumberString()
 {
 	char res[54](""),signum[2]("");
 	char nom[24](""),denom[24]("");
+	if (this->nomerator ==1 && this->decimalSystem == 0)
+		return "undef";
+	if (this->nomerator == this->denomerator && this->nomerator == 0)
+		return "undef";
 	if (this->decimalSystem == 0)
 		return "";
 	if (this->ifInited == -1)
 		return "mem_undef";
-	if (this->nomerator == this->denomerator && this->nomerator == 0)
-		return "undef";
+
 	if (this->ifBool)// Check BOOL
 	{
 		if (this->nomerator==0)
@@ -227,6 +230,21 @@ bool Number::printNumber( FILE * out)
 		return true;
 	else
 		return false;
+}
+
+double Number::convertToDouble()
+{
+	return static_cast<double>(nomerator)/denomerator;
+}
+
+void Number::changeSignum()
+{
+	nomerator = -nomerator;
+	denomerator = denomerator;
+	if (nomerator<0 && denomerator<0){
+		nomerator=-nomerator;
+		denomerator=-denomerator;
+	}
 }
 
 int nextDecSystem( int a )

@@ -229,7 +229,7 @@ Word::cast Data::getType()
 }
 Number Data::evalute(Number a , Number b)
 {
-	Number (*callFunc)(Number& , Number &);
+	Number (*callFunc)(Number  , Number );
 	int n = this->priority%50;
 	switch (n)
 	{
@@ -276,7 +276,7 @@ Number Data::evalute(Number a , Number b)
 	this->doesDataInited = true;
 	return storedData;
 }
-Number and(Number& a,Number& b){
+Number and(Number  a,Number  b){
 	Number result,tA,tB;
 	if (biggerEq(a,Number(1,1))==Number(1,1))
 		tA.setValue(1,1);
@@ -293,7 +293,7 @@ Number and(Number& a,Number& b){
 	result.ifBool = true;
 	return result;
 }
-Number or(Number&a,Number&b){
+Number or(Number a,Number b){
 	Number result,tA,tB;
 	if (biggerEq(a,Number(1,1))==Number(1,1))
 		tA.setValue(1,1);
@@ -310,7 +310,7 @@ Number or(Number&a,Number&b){
 	result.ifBool = true;
 	return result;
 }
-Number equal( Number&a,Number &b)
+Number equal( Number a,Number b)
 {
 	Number result(0);
 	result.ifBool = true;
@@ -322,7 +322,7 @@ Number equal( Number&a,Number &b)
 		return result;
 	}
 }
-Number notEqual(Number&a,Number&b){
+Number notEqual(Number a,Number b){
 	Number result;
 	result = equal(a,b);
 	if (result==Number(1,1))
@@ -331,7 +331,7 @@ Number notEqual(Number&a,Number&b){
 		result.setValue(1,1);
 	return result;
 }
-Number less(Number&a,Number&b){
+Number less(Number a,Number b){
 	Number result(0);
 	result.ifBool = true;
 	long double aD,bD;
@@ -345,7 +345,7 @@ Number less(Number&a,Number&b){
 		return result;
 	}
 }
-Number lessEq(Number&a,Number&b){
+Number lessEq(Number a,Number b){
 	Number result;
 	result = bigger(a,b);
 	if (result==Number(1,1))
@@ -354,7 +354,7 @@ Number lessEq(Number&a,Number&b){
 		result.setValue(1,1);
 	return result;
 }
-Number bigger(Number&a,Number&b){
+Number bigger(Number a,Number b){
 	Number result(0);
 	result.ifBool = true;
 	long double aD,bD;
@@ -368,7 +368,7 @@ Number bigger(Number&a,Number&b){
 		return result;
 	}
 }
-Number biggerEq(Number&a,Number&b){
+Number biggerEq(Number a,Number b){
 	Number result;
 	result = less(a,b);
 	if (result==Number(1,1))
@@ -377,7 +377,7 @@ Number biggerEq(Number&a,Number&b){
 		result.setValue(1,1);
 	return result;
 }
-Number plus(Number &a,Number &b)
+Number plus(Number a,Number b)
 {	
 	Number temp(0);
 	long long gcd = 0;
@@ -395,25 +395,20 @@ Number plus(Number &a,Number &b)
 	temp.updateDecimalSystem(a,b);
 	return temp;
 }
-Number subtraction(Number&a,Number&b){
+Number subtraction(Number a,Number b){
 	Number temp(0);
 	long long gcd = 0;
-
+	if (a.ifINF || b.ifINF){
+		b.changeSignum();
+		return plusINF(a,b);
+	}
 	if (a.decimalSystem < 0 && b.decimalSystem!=-1){
-		temp.nomerator = -b.nomerator;
-		temp.denomerator = b.denomerator;
-		if (temp.nomerator<0 && temp.denomerator<0){
-			temp.nomerator=-temp.nomerator;
-			temp.denomerator=-temp.denomerator;
-		}
+		temp = b;
+		temp.changeSignum();
+		
 	} else if (b.decimalSystem < 0 && a.decimalSystem!=-1){
 		temp=a;
-		temp.nomerator = -a.nomerator;
-		temp.denomerator = a.denomerator;
-		if (temp.nomerator<0 && temp.denomerator<0){
-			temp.nomerator=-temp.nomerator;
-			temp.denomerator=-temp.denomerator;
-		}
+		temp.changeSignum();
 	} else {
 		temp.nomerator = a.nomerator*b.denomerator - b.nomerator*a.denomerator;
 		temp.denomerator = a.denomerator*b.denomerator;
@@ -424,7 +419,7 @@ Number subtraction(Number&a,Number&b){
 	temp.updateDecimalSystem(a,b);
 	return temp;
 }
-Number production( Number& a,Number& b)
+Number production( Number  a,Number  b)
 {
 	Number temp(0);
 	long long gcd = 0;
@@ -442,7 +437,7 @@ Number production( Number& a,Number& b)
 	temp.updateDecimalSystem(a,b);
 	return temp;
 }
-Number division(Number &a,Number &b){
+Number division(Number a,Number b){
 	Number temp(0);
 	long long gcd = 0;
 	if (b.nomerator==0){
@@ -453,8 +448,7 @@ Number division(Number &a,Number &b){
 
 	if (a.ifINF && b.ifINF)
 	{
-		temp.ifNumber=false;
-		return temp;
+		return Number(1,1);
 	}
 	a.nomerator = (a.decimalSystem < 0)? 1 : a.nomerator;
 	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
@@ -469,7 +463,7 @@ Number division(Number &a,Number &b){
 	temp.updateDecimalSystem(a,b);
 	return temp;
 }
-Number exponent(Number&a,Number&b){
+Number exponent(Number a,Number b){
 	int dec = 1000000000;
 	long long gcd;
 	Number result;
@@ -525,7 +519,7 @@ Number exponent(Number&a,Number&b){
 	result.updateDecimalSystem(a,b);
 	return result;
 }
-Number remainder(Number&a,Number&b){
+Number remainder(Number a,Number b){
 	Number temp;
 	a.nomerator = (a.decimalSystem < 0)? 1 : a.nomerator;
 	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
@@ -540,7 +534,7 @@ Number remainder(Number&a,Number&b){
 	temp.updateDecimalSystem(a,b);
 	return temp;
 }
-Number Data::levlNOper(Number& a ,Number& b)
+Number Data::levlNOper(Number  a ,Number  b)
 {
 	int n = this->priority%50-18;
 	return recLevNOper(a,b,n);
@@ -548,7 +542,7 @@ Number Data::levlNOper(Number& a ,Number& b)
 
 
 
-Number recLevNOper( Number& a,Number& b, int n)
+Number recLevNOper( Number  a,Number  b, int n)
 {
 	a.nomerator = (a.decimalSystem < 0)? 1 : a.nomerator;
 	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
@@ -565,7 +559,21 @@ Number recLevNOper( Number& a,Number& b, int n)
 	return recLevNOper(a,temp,n-1);
 }
 
-Number plusINF( Number &,Number& )
+Number plusINF( Number a,Number b )
 {
-	return Number();
+	double l = a.convertToDouble(),r=b.convertToDouble();
+	if (a.ifINF && b.ifINF){
+		if (l>0 && r>0){
+			return a;
+		} else {
+			return Number(0);
+		}
+	}
+	if (a.ifINF && !b.ifINF){
+		return a;
+	}
+	if (!a.ifINF && b.ifINF){
+		return b;
+	}
+
 }

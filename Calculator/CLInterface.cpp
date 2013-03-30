@@ -261,11 +261,12 @@ void memOut( FILE * out, List<Data> &mem)
 	List<Data>::Node *current = mem.tail;
 	Number memVal;
 	Data * dat = nullptr;
-	fprintf(out,"%-8s%-20s%-12s%-12s\n","Name","Value","ifTreeInit","Tree Address");
+	fprintf(out,"%-8s%-20s%-20s%-12s%-12s\n","Name","Tree","Value","ifTreeInit","Tree Address");
 	while(current!=nullptr)
 	{
 		dat = &current->data;
 		fprintf(out,"%-8s",dat->name);	
+		fprintf(out,"%-20s",dat->tree->getCharNode());
 		char val[54];
 		memVal = dat->tree->evaluteNode(mem);
 		strcpy(val,memVal.getNumberString());
