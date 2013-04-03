@@ -103,14 +103,21 @@ Number Node::evaluteNode(List<Data> &var)
 		List<Data>::Node* mem = var.search(this->data);
 		if (mem!=nullptr){
 			recursiveDepth++;
-			Number ret = mem->data.tree->evaluteNode(var);
-			recursiveDepth--;
+			Number ret;
+			if (mem->data.tree == nullptr) {
+				ret.setValue(0,1);
+				ret.decimalSystem = 10;
+				ret.ifInited = true;
+				ret.ifNumber = true;
+			} else
+				 ret = mem->data.tree->evaluteNode(var);
+			recursiveDepth--;	
 			return ret;
 		}else{
 			var.add(this->data);
 			var.head->data.doesDataInited=false;
 			var.head->data.doesTreeInited=false;
-			Number res(0,0);
+			Number res(0,1);
 			res.decimalSystem = -2;
 			var.head->data.storedData=res;
 			return res;
@@ -128,9 +135,10 @@ Number Node::evaluteNode(List<Data> &var)
 			isAssign = true;
 		if (isAssign){
 			recursiveDepth++;
-			Number ret = assign(this->right,this->left,var);
+			Node* ret = assign_(this->left,this->right,var);
+			Number result = ret->evaluteNode(var);
 			recursiveDepth--;
-			return ret;
+			return result;
 		}
 		Number a,b;
 
@@ -257,147 +265,6 @@ Number Tree::EvaluteTree(List<Data>& mem)
 	return result;
 }
 
-Number assign(Node*r,Node* l,List<Data>& var){
-	//TODO: Check bugs
-	if (l==nullptr && r!=nullptr){
-		if (r->data.type == Word::variable)
-		{
-			List<Data>::Node* mem = var.search(r->data);
-			if (mem!=nullptr){
-				return mem->data.tree->evaluteNode(var);
-			}
-		}
-		return (r->data.doesTreeInited)? r->data.tree->evaluteNode(var) : r->data.storedData;
-	}
-	if (r==nullptr && l!=nullptr){
-		if (l->data.type == Word::variable)
-		{
-			List<Data>::Node* mem = var.search(l->data);
-			if (mem!=nullptr){
-				return mem->data.tree->evaluteNode(var);
-			}
-		}
-		return (l->data.doesTreeInited)? l->data.tree->evaluteNode(var) : l->data.storedData;
-	}
-	if (l==nullptr && r==nullptr)
-		return Number(0,1);
-	Number result;
-	if (l->data.type != Word::variable && r->data.type != Word::variable)
-	{
-		//Maybe add false assingning parametr
-		result.setValue(0,1);
-		result.ifBool = true;
-		return result;
-	}
-	if (l->data.type == Word::cast::number && r->data.type == Word::cast::variable || l->data.type == Word::cast::variable && r->data.type == Word::cast::number)
-	{
-		if (l->data.type == Word::number){
-			Node* temp = l; l = r; r = temp;
-		}
-
-		List<Data>::Node* mem = var.search(l->data);
-		if (mem!=nullptr){
-			mem->data.doesDataInited=false;
-			mem->data.doesTreeInited=true;
-			result = r->evaluteNode(var);
-			if (mem->data.tree == 0){
-					mem->data.tree = r;
-			} else if (mem->data.tree != r){
-				mem->data.tree->cutNode();
-				mem->data.tree = r;
-			}
-			return result;
-		} else {
-			var.add(l->data);
-			var.head->data.doesDataInited=false;
-			var.head->data.doesTreeInited=true;
-			var.head->data.tree=r;
-			return var.head->data.tree->evaluteNode(var);
-		}
-	}
-	if (l->data.type == Word::cast::delimiter && r->data.type == Word::cast::variable || l->data.type == Word::cast::variable && r->data.type == Word::cast::delimiter ){
-		if (l->data.type == Word::delimiter){
-			Node* temp = l; l = r; r = temp;
-		}
-		List<Data>::Node* mem = var.search(l->data);
-		if (mem!=nullptr){
-			mem->data.doesTreeInited=true;
-			result = r->evaluteNode(var);
-			if (mem->data.tree == 0){
-				mem->data.tree = r;
-			} else if (mem->data.tree != r){
-				mem->data.tree->cutNode();
-				mem->data.tree = r;
-			}
-			return result;
-		} else {
-			var.add(l->data);
-			var.head->data.doesDataInited=false;
-			var.head->data.doesTreeInited=true;
-			var.head->data.tree=r;
-			return r->evaluteNode(var);
-		}
-	}
-	if (l->data.type == Word::cast::variable && r->data.type == Word::cast::variable){
-		List<Data>::Node* mem1 = var.search(l->data);
-		List<Data>::Node* mem2 = var.search(r->data);
-		if (mem1==mem2 && mem1 == nullptr){
-			var.add(l->data);
-			var.head->data.doesDataInited=false;
-			var.head->data.doesTreeInited=false;
-			if (strcmp(l->data.name,r->data.name)){
-				var.add(r->data);
-				var.head->data.doesDataInited=false;
-				var.head->data.doesTreeInited=false;
-				var.head->prev->data.tree = r;
-			}
-			Number ret(0,0);
-			ret.decimalSystem = -2;
-			return ret;
-		} else if (mem1 == mem2){
-			if (mem1->data.doesTreeInited == true){
-				result = mem1->data.tree->evaluteNode(var);
-				return result;
-			} else
-				return mem1->data.storedData;
-		} else if (mem1 == nullptr && mem2!=nullptr){
-				var.add(l->data);
-				if (mem2->data.doesTreeInited){
-					var.head->data.doesDataInited=false;
-					var.head->data.tree = r;
-					return r->evaluteNode(var);
-				} else {
-					var.head->data.doesDataInited=true;
-					var.head->data.storedData = mem2->data.storedData;
-					return var.head->data.storedData;
-				}
-		} else if (mem2 == nullptr && mem1!=nullptr){
-				var.add(r->data);
-				if (mem1->data.doesTreeInited){
-					var.head->data.doesDataInited=false;
-					var.head->data.tree = l;
-					return l->evaluteNode(var);
-				} else {
-					var.head->data.doesDataInited=true;
-					var.head->data.storedData = mem1->data.storedData;
-					return var.head->data.storedData;
-				}
-		} else { // if two variables inited assign left to the right
-				if (mem1->data.doesTreeInited=true){
-					//delete var.head->data.tree;
-					result = var.head->data.tree->evaluteNode(var);
-					mem1->data.tree->cutNode();
-					mem1->data.tree = r;
-					return result;
-				} else {
-					mem1->data.doesDataInited=true;
-					mem1->data.storedData = mem2->data.storedData;
-					return mem1->data.storedData;
-				}
-			}
-		}		
-	return result;
-}
 
 bool appSonL( Node* dad, Node* son )
 {
@@ -407,6 +274,115 @@ bool appSonL( Node* dad, Node* son )
 		return true;
 	} else
 		return appSon(dad,son);
+}
+
+Node * assign_( Node*l,Node*r,List<Data>& var)
+{
+	Node* result;
+	if (l == nullptr || r==nullptr){
+		result = (r==nullptr)? l : r;
+		if (result == nullptr) {
+			result = new Node;
+			result->data.doesDataInited = true;
+			result->data.storedData.setValue(0,0);
+			result->data.priority = 30;
+			result->data.storedData.decimalSystem = -1;
+			return result;
+		} else 
+			return result;
+	}
+	if (l->data.type != Word::variable && r->data.type != Word::variable)
+	{
+		result = new Node;
+		result->data.doesDataInited = true;
+		result->data.storedData.setValue(0,0);
+		result->data.storedData.ifBool = true;
+		result->data.priority = 30;
+		result->data.storedData.decimalSystem = 10;
+		return result;
+	}
+	if				(l->data.type == Word::number    || r->data.type == Word::number)
+	{
+		if (l->data.type == Word::number){
+			Node* temp = l; l = r; r = temp;
+		}
+		List<Data>::Node* mem  = var.search(l->data);
+		if (mem!=nullptr){
+			result = r;
+			if (r->ifHasAssign())
+				mem->data.tree = assign_(r->left,r->right,var);
+			else 
+				mem->data.tree = r;
+			return mem->data.tree;
+		} else {
+			var.add(l->data);
+			mem = var.head;
+			mem->data.doesDataInited=false;
+			mem->data.doesTreeInited=true;
+			if (r->ifHasAssign())
+				mem->data.tree = assign_(r->left,r->right,var);
+			else 
+				mem->data.tree = r;
+			return mem->data.tree;
+		}
+	} else if (l->data.type == Word::delimiter || r->data.type == Word::delimiter)
+	{
+		if (l->data.type == Word::delimiter){
+			Node* temp = l; l = r; r = temp;
+		}
+		List<Data>::Node* mem  = var.search(l->data);
+		if (mem!=nullptr){
+			result = r;
+			if (r->ifHasAssign())
+				mem->data.tree = assign_(r->left,r->right,var);
+			else 
+				mem->data.tree = r;
+			return mem->data.tree;
+		} else {
+			var.add(l->data);
+			mem = var.head;
+			mem->data.doesDataInited=false;
+			mem->data.doesTreeInited=true;
+			if (r->ifHasAssign())
+				mem->data.tree = assign_(r->left,r->right,var);
+			else 
+				mem->data.tree = r;
+			return mem->data.tree;
+		}
+	} else if (l->data.type == Word::variable  && r->data.type == Word::variable)
+	{
+		List<Data>::Node* memL = var.search(l->data);
+		List<Data>::Node* memR = var.search(r->data);
+		if				(memL == nullptr && memR == nullptr){
+			var.add(l->data);
+			var.add(r->data);
+			result = new Node;
+			return result;
+		} else if (memL != nullptr && memR != nullptr){
+				memL->data.tree = memR->data.tree;
+			return memL->data.tree;
+		} else if (memL == nullptr && memR != nullptr){
+			var.add(l->data);
+			var.head->data.tree = memR->data.tree;
+			return var.head->data.tree;
+		} else																				{
+			var.add(r->data);
+			memL->data.tree = var.head->data.tree = nullptr;
+			result = new Node;
+			return result;
+		}
+
+		
+	} else {
+		result = new Node;
+		result->data.doesDataInited = true;
+		result->data.storedData.setValue(0,0);
+		result->data.storedData.ifBool = true;
+		result->data.priority = 30;
+		result->data.storedData.decimalSystem = 10;
+		return result;
+	}
+	return result;
 }
 
 void Node::removeNods()
@@ -428,6 +404,17 @@ void Node::cutNode()
 	if (this->right != nullptr)
 		this->right->parent = nullptr;
 	delete this;
+}
+
+bool Node::ifHasAssign()
+{
+	bool isNameRight = strchr(this->data.name,61) != nullptr; 
+	bool isDelimiter = this->data.type == Word::delimiter;
+	bool isPriorityRight = this->data.priority > 0 && this->data.priority <4;
+	if (isDelimiter && isNameRight && isPriorityRight)
+		return true;
+	else 
+		return false;
 }
 
 char* Tree::getTreeCharArr()

@@ -176,9 +176,10 @@ bool improveInput(List<Word> &list)
 	int size = list.getSize();
 	for(int i = 0; i < size-1; i++)
 	{
-		if (list.at(i)->data.type == Word::cast::number && list.at(i+1)->data.type == Word::cast::number){
+		if (list.at(i)->data.type != Word::delimiter && list.at(i+1)->data.type != Word::delimiter){
 			list.insertAfter(i,Word("+"));
 			list.at(i+1)->data.setType(Word::cast::delimiter);
+			size++;
 			i=0;
 		}
 		if (list.at(i)->data.type == Word::cast::number && !strcmp(list.at(i+1)->data.word,"(")){
@@ -262,7 +263,7 @@ void memOut( FILE * out, List<Data> &mem)
 	List<Data>::Node *current = mem.tail;
 	Number memVal;
 	Data * dat = nullptr;
-	fprintf(out,"%-8s%-20s%-20s%-12s%-12s\n","Name","Tree","Value","ifTreeInit","Tree Address");
+	fprintf(out,"%-8s%-20s%-20s%-12s\n","Name","Tree","Value","Tree Address");
 	while(current!=nullptr)
 	{
 		dat = &current->data;
@@ -272,7 +273,6 @@ void memOut( FILE * out, List<Data> &mem)
 		memVal = dat->tree->evaluteNode(mem);
 		strcpy(val,memVal.getNumberString());
 		fprintf(out,"%-20s",val);
-		fprintf(out,"%-12s",(dat->doesTreeInited)?"true":"false");
 		fprintf(out,"%-12p\n",dat->tree);
 		current=current->next;
 	}
@@ -281,9 +281,9 @@ void memOut( FILE * out, List<Data> &mem)
 void printHelp( FILE * out)
 {
 
-	fprintf(out,"Type exspression in single row, you can use variables, they defined when you first time call variable;\n");
-	fprintf(out,"Calculator support different decimal systems: binary(\"0b\"), oct(\"0b\"), dec(standart) and hex(\"0x\")\n");
-	
+	fprintf(out,"Type exspression in single row, you can use variables,\n they defined when you first time call variable;\n");
+	fprintf(out,"Calculator support different decimal systems: binary(\"0b\"), oct(\"0\"), dec(standart) and hex(\"0x\")\n");
+	fprintf(out,"If you use bigger numbers than have current decimal system,\n it will change current decimal system to the bigger one.\n");
 	fprintf(out,"Press \"h\" for help");
 	fprintf(out,"Type \"mem\" to see memory state.\n");
 	fprintf(out,"Press \"q\" for exit.\n");

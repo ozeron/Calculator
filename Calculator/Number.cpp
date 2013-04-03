@@ -80,7 +80,8 @@ Number::Number(Word &right)
 		i+=2;
 	}
 	int nextNum = 0;
-	if (strstr("INF0bINF,0INF,0xINF",right.word+i)!=0){
+	
+	if (strstr("INF",right.word+i)!=0 && i < strlen(right.word)){
 		this->nomerator = INT64_MAX;
 		this->denomerator = 1;
 		decimalSystem=10;
@@ -132,13 +133,13 @@ bool Number::operator==( Number & right) const
 
 void Number::updateDecimalSystem( Number a,Number  b)
 {
-	if (a.decimalSystem < -1)
+	if (a.decimalSystem < 0)
 		this->decimalSystem = b.decimalSystem;
-	if (b.decimalSystem < -1)
+	if (b.decimalSystem < 0)
 		this->decimalSystem = a.decimalSystem;
-	if (a.decimalSystem < -1 && b.decimalSystem < -1)
+	if (a.decimalSystem < 0 && b.decimalSystem < 0)
 		this->decimalSystem = 10;
-	if (a.decimalSystem != -1 && b.decimalSystem != -1)
+	if (a.decimalSystem > 0 && b.decimalSystem > 0)
 		this->decimalSystem = a.decimalSystem;
 }
 
@@ -158,6 +159,8 @@ char* Number::getNumberString()
 {
 	char res[54](""),signum[2]("");
 	char nom[24](""),denom[24]("");
+	if (this->decimalSystem < 0)
+		return "undef";
 	if (this->nomerator ==1 && this->decimalSystem == 0)
 		return "undef";
 	if (this->nomerator == this->denomerator && this->nomerator == 0)

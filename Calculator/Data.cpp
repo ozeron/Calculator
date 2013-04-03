@@ -11,6 +11,8 @@ Data::Data(void){
 	doesTreeInited = false;
 	type = Word::cast::null;
 	int priority = 100;
+	storedData.setValue(0,1);
+	storedData.decimalSystem = -2;
 }
 Data::Data(Word right){
 	tree = nullptr;

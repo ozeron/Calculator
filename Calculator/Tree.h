@@ -20,11 +20,12 @@ struct Node{
 	Number evaluteNode(List<Data>&);
 	void cutNode();
 	void removeNods();
+	bool ifHasAssign();
 	char* getCharNode();
 };
 bool appSon(Node* dad, Node* son);//append son
 bool appSonL(Node* dad, Node* son);
-Number assign(Node*,Node*,List<Data>&);
+Node *assign_(Node*,Node*,List<Data>&);
 class Tree
 {
 public:
