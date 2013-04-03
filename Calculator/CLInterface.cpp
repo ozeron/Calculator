@@ -166,6 +166,7 @@ List<Word>* stringParse(char* arr)
 			i+=j;
 			continue;
 		}
+		i++;
 	}
 	return list;
 }

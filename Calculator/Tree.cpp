@@ -299,13 +299,14 @@ Number assign(Node*r,Node* l,List<Data>& var){
 		if (mem!=nullptr){
 			mem->data.doesDataInited=false;
 			mem->data.doesTreeInited=true;
+			result = r->evaluteNode(var);
 			if (mem->data.tree == 0){
 					mem->data.tree = r;
 			} else if (mem->data.tree != r){
 				mem->data.tree->cutNode();
 				mem->data.tree = r;
 			}
-			return r->evaluteNode(var);
+			return result;
 		} else {
 			var.add(l->data);
 			var.head->data.doesDataInited=false;
@@ -321,13 +322,14 @@ Number assign(Node*r,Node* l,List<Data>& var){
 		List<Data>::Node* mem = var.search(l->data);
 		if (mem!=nullptr){
 			mem->data.doesTreeInited=true;
+			result = r->evaluteNode(var);
 			if (mem->data.tree == 0){
 				mem->data.tree = r;
 			} else if (mem->data.tree != r){
 				mem->data.tree->cutNode();
 				mem->data.tree = r;
 			}
-			return r->evaluteNode(var);;
+			return result;
 		} else {
 			var.add(l->data);
 			var.head->data.doesDataInited=false;
