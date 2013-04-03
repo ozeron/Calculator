@@ -288,3 +288,8 @@ void printHelp( FILE * out)
 	fprintf(out,"Type \"mem\" to see memory state.\n");
 	fprintf(out,"Press \"q\" for exit.\n");
 }
+
+void undefine (char* arr)
+{
+
+}

@@ -114,12 +114,8 @@ Number Node::evaluteNode(List<Data> &var)
 			recursiveDepth--;	
 			return ret;
 		}else{
-			var.add(this->data);
-			var.head->data.doesDataInited=false;
-			var.head->data.doesTreeInited=false;
 			Number res(0,1);
 			res.decimalSystem = -2;
-			var.head->data.storedData=res;
 			return res;
 		}
 	}
@@ -246,7 +242,7 @@ bool Tree::addNode(Node* &dad, Node*node)
 	} else if (dad->data.getPriority() < node->data.getPriority()){
 		result = appSon(dad,node);
 	} else {
-		if (dad->data.getPriority() < 19 && dad->data.getPriority()>13){
+		if (dad->data.getPriority() < 21 && dad->data.getPriority()>13){
 			result = dad->appDad(node);
 			dad=node;
 		} else
@@ -355,7 +351,8 @@ Node * assign_( Node*l,Node*r,List<Data>& var)
 		List<Data>::Node* memR = var.search(r->data);
 		if				(memL == nullptr && memR == nullptr){
 			var.add(l->data);
-			var.add(r->data);
+			if (strcmp(l->data.name,r->data.name))
+				var.add(r->data);
 			result = new Node;
 			return result;
 		} else if (memL != nullptr && memR != nullptr){

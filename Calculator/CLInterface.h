@@ -17,7 +17,7 @@ int cli(FILE*);
 List<Word> *stringParse(char*);
 bool improveInput(List<Word> &list);
 
-
+void undefine(char*);
 void CLITEST();
 void memOut(FILE *,List<Data>&);
 void printHelp(FILE *);
