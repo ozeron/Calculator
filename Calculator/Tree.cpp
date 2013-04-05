@@ -84,16 +84,19 @@ Number Node::getValue()
 }
 Number Node::evaluteNode(List<Data> &var)
 {
+	Number ret(0,0);
+	ret.decimalSystem = -1;
+	ret.ifInited = false;
+	ret.ifINF = false;
+
 	static int recursiveDepth = 0;
 	if (recursiveDepth == 25){
-		Number ret(0,1);
 		ret.decimalSystem = -1;
 		return ret;
 	}
 	if (this==nullptr){
-		Number res(1,0);
-		res.decimalSystem = 0;
-		return res;
+		ret.decimalSystem = 0;
+		return ret;
 	}
 	if (this->data.type == Word::cast::number)
 		return this->getValue();
@@ -156,7 +159,7 @@ Number Node::evaluteNode(List<Data> &var)
 		recursiveDepth--;
 		return ret;
 	}
-	return Number(0,0);
+	return ret;
 }
 
 char* Node::getCharNode()
@@ -254,9 +257,9 @@ bool Tree::addNode(Node* &dad, Node*node)
 Number Tree::EvaluteTree(List<Data>& mem)
 { 
 	Number result = this->root->evaluteNode(mem);
-	if (static_cast<double>(result.nomerator)/result.denomerator >= INT_MAX-10)
+	if (static_cast<double>(result.nomerator)/result.denomerator >= INT64_MAX-10)
 		result.ifINF = true;
-	if (static_cast<double>(result.nomerator)/result.denomerator <=-(INT_MAX-10))
+	if (static_cast<double>(result.nomerator)/result.denomerator <=-(INT64_MAX-10))
 		result.ifINF = true;
 	return result;
 }
@@ -279,6 +282,7 @@ Node * assign_( Node*l,Node*r,List<Data>& var)
 		result = (r==nullptr)? l : r;
 		if (result == nullptr) {
 			result = new Node;
+			strcpy(result->data.name,"undef");
 			result->data.doesDataInited = true;
 			result->data.storedData.setValue(0,0);
 			result->data.priority = 30;
@@ -290,11 +294,12 @@ Node * assign_( Node*l,Node*r,List<Data>& var)
 	if (l->data.type != Word::variable && r->data.type != Word::variable)
 	{
 		result = new Node;
+		strcpy(result->data.name,"undef");
 		result->data.doesDataInited = true;
 		result->data.storedData.setValue(0,0);
 		result->data.storedData.ifBool = true;
 		result->data.priority = 30;
-		result->data.storedData.decimalSystem = 10;
+		result->data.storedData.decimalSystem = -1;
 		return result;
 	}
 	if				(l->data.type == Word::number    || r->data.type == Word::number)
@@ -317,8 +322,10 @@ Node * assign_( Node*l,Node*r,List<Data>& var)
 			mem->data.doesTreeInited=true;
 			if (r->ifHasAssign())
 				mem->data.tree = assign_(r->left,r->right,var);
-			else 
+			else {
 				mem->data.tree = r;
+				r->cutNode();
+			}
 			return mem->data.tree;
 		}
 	} else if (l->data.type == Word::delimiter || r->data.type == Word::delimiter)
@@ -341,8 +348,10 @@ Node * assign_( Node*l,Node*r,List<Data>& var)
 			mem->data.doesTreeInited=true;
 			if (r->ifHasAssign())
 				mem->data.tree = assign_(r->left,r->right,var);
-			else 
+			else {
 				mem->data.tree = r;
+				r->cutNode();
+			}
 			return mem->data.tree;
 		}
 	} else if (l->data.type == Word::variable  && r->data.type == Word::variable)
@@ -351,20 +360,18 @@ Node * assign_( Node*l,Node*r,List<Data>& var)
 		List<Data>::Node* memR = var.search(r->data);
 		if				(memL == nullptr && memR == nullptr){
 			var.add(l->data);
-			if (strcmp(l->data.name,r->data.name))
-				var.add(r->data);
+			var.head->data.tree= r;
 			result = new Node;
 			return result;
 		} else if (memL != nullptr && memR != nullptr){
-				memL->data.tree = memR->data.tree;
+				memL->data.tree = r;
 			return memL->data.tree;
 		} else if (memL == nullptr && memR != nullptr){
 			var.add(l->data);
-			var.head->data.tree = memR->data.tree;
+			var.head->data.tree = r;
 			return var.head->data.tree;
 		} else																				{
-			var.add(r->data);
-			memL->data.tree = var.head->data.tree = nullptr;
+			memL->data.tree = r;
 			result = new Node;
 			return result;
 		}
@@ -376,7 +383,7 @@ Node * assign_( Node*l,Node*r,List<Data>& var)
 		result->data.storedData.setValue(0,0);
 		result->data.storedData.ifBool = true;
 		result->data.priority = 30;
-		result->data.storedData.decimalSystem = 10;
+		result->data.storedData.decimalSystem = -1;
 		return result;
 	}
 	return result;
@@ -393,22 +400,34 @@ void Node::cutNode()
 {
 	if (this == nullptr)
 		return;
-	if (this->parent != nullptr)
-		this->parent->right = nullptr;
+	Node *node =this->parent;
 	
-	if (this->left != nullptr)
-		this->left->parent = nullptr;
-	if (this->right != nullptr)
-		this->right->parent = nullptr;
-	delete this;
+	if (node->parent != nullptr && node->parent->left == node){
+		node->parent->left = this;
+		this->parent = node->parent;
+		node->parent = nullptr;
+	} else if (node->parent != nullptr && node->parent->right == node){
+		node->parent->right = this;
+		this->parent = node->parent;
+		node->parent = nullptr;
+	}
+	if (node->parent != nullptr &&  node->left == this){
+		node->left = nullptr;
+		delete node->right;
+		delete node;
+	}
+	if (node->parent != nullptr &&  node->right == this){
+		node->right = nullptr;
+		delete node->left;
+		delete node;
+	}
 }
 
 bool Node::ifHasAssign()
 {
 	bool isNameRight = strchr(this->data.name,61) != nullptr; 
 	bool isDelimiter = this->data.type == Word::delimiter;
-	bool isPriorityRight = this->data.priority > 0 && this->data.priority <4;
-	if (isDelimiter && isNameRight && isPriorityRight)
+	if (isDelimiter && isNameRight)
 		return true;
 	else 
 		return false;
@@ -484,7 +503,8 @@ Node* Tree::backToPeviousSubTreeLvl( Node* &dad,List<Word>::Node* & word)
 		} else
 			node = new Node(word->data);
 		addNode(dad,node);
-		word = word->next;
+		if (word!= nullptr)
+			word = word->next;
 	}
 	dad->data.priority +=50;
 	return dad;

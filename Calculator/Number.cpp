@@ -152,6 +152,7 @@ void Number::setValue( long long a, long long b)
 		this->nomerator/=gcd;
 		this->denomerator/=gcd;
 	}
+
 	ifINF = false;
 }
 

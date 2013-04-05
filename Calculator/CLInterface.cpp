@@ -22,6 +22,10 @@ int cli(FILE* mainio)
 			memOut(stdout,memory);
 			continue;
 		}
+		if (buf[0]=='\n'){
+			fprintf(stdout,"Empty. Type \"h\" for help.\n");
+			continue;
+		}
 		//TODO: Implement all CLI commands
 		inputData = stringParse(buf);
 		improveInput(*inputData);
@@ -176,6 +180,12 @@ bool improveInput(List<Word> &list)
 	int size = list.getSize();
 	for(int i = 0; i < size-1; i++)
 	{
+		if (list.at(i)->data.type == Word::number && list.at(i+1)->data.type == Word::variable){
+			list.insertAfter(i,Word("*"));
+			list.at(i+1)->data.setType(Word::cast::delimiter);
+			size++;
+			i=0;
+		}
 		if (list.at(i)->data.type != Word::delimiter && list.at(i+1)->data.type != Word::delimiter){
 			list.insertAfter(i,Word("+"));
 			list.at(i+1)->data.setType(Word::cast::delimiter);
@@ -243,6 +253,7 @@ bool improveInput(List<Word> &list)
 
 void CLITEST()
 {
+	undefine("");
 	cli(stdin);
 	Word a('c');
 	Word b;
@@ -281,15 +292,17 @@ void memOut( FILE * out, List<Data> &mem)
 void printHelp( FILE * out)
 {
 
-	fprintf(out,"Type exspression in single row, you can use variables,\n they defined when you first time call variable;\n");
-	fprintf(out,"Calculator support different decimal systems: binary(\"0b\"), oct(\"0\"), dec(standart) and hex(\"0x\")\n");
-	fprintf(out,"If you use bigger numbers than have current decimal system,\n it will change current decimal system to the bigger one.\n");
-	fprintf(out,"Press \"h\" for help");
-	fprintf(out,"Type \"mem\" to see memory state.\n");
+	fprintf(out,"Type exspression in single row, you can use variables,\nthey defined when you first time call variable;\n");
+	fprintf(out,"\nCalculator support different decimal systems:\nbinary(\"0b\"), oct(\"0\"), dec(standart) and hex(\"0x\")\n");
+	fprintf(out,"\nbinary: 0,1\n");
+	fprintf(out,"oct: 0,1,2,3,4,5,6,7\n");
+	fprintf(out,"dec: 0,1,2,3,4,5,6,7,8,9\n");
+	fprintf(out,"hex: 0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F\n");
+	fprintf(out,"\nIf you use bigger numbers than have current decimal system,\nit will change current decimal system to the bigger one.\n");
+	fprintf(out,"\nType \"mem\" to see memory state.\n");
 	fprintf(out,"Press \"q\" for exit.\n");
 }
 
 void undefine (char* arr)
-{
-
+{ 
 }

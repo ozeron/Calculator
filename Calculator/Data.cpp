@@ -51,7 +51,7 @@ Data::Data(const Data& right)
 	this->priority = right.priority;
 }
 Data::~Data(void){
-	delete tree;
+//	delete tree;
 	tree = nullptr;
 }
 Data& Data::operator=(const Data &right)
@@ -442,6 +442,13 @@ Number production( Number  a,Number  b)
 Number division(Number a,Number b){
 	Number temp(0);
 	long long gcd = 0;
+	if (a.nomerator == 0 && b.nomerator == 0)
+	{
+		temp.setValue(0,1);
+		temp.ifInited = false;
+		temp.decimalSystem = -1;
+		return temp;
+	}
 	if (b.nomerator==0){
 		temp.setValue(INT64_MAX,1);
 		temp.ifINF=true;
@@ -452,6 +459,9 @@ Number division(Number a,Number b){
 	{
 		return Number(1,1);
 	}
+	
+	if (b.ifINF)
+		return Number(0,1);
 	a.nomerator = (a.decimalSystem < 0)? 1 : a.nomerator;
 	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
 	b.nomerator = (b.decimalSystem < 0)? 1 : b.nomerator;
@@ -474,7 +484,16 @@ Number exponent(Number a,Number b){
 	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
 	b.nomerator = (b.decimalSystem < 0)? 1 : b.nomerator;
 	b.denomerator = (b.decimalSystem < 0)? 1 : b.denomerator;
-
+	if (a.nomerator == 1 && a.nomerator == 1)
+	{
+		return a;
+	}
+	if (a.ifINF && b.nomerator == 0)
+	{
+		result.setValue(1,1);
+		result.ifInited = true;
+		return result;
+	}
 	if (a.ifINF || b.ifINF)
 	{
 		result.setValue(INT64_MAX,1);
@@ -483,6 +502,11 @@ Number exponent(Number a,Number b){
 	}
 
 	temp = static_cast<double>(a.nomerator)/a.denomerator;
+	if (temp<0){
+		Number res(0,1);
+		res.decimalSystem = -1;
+		return res;
+	}
 	if ((static_cast<double>(b.nomerator)/b.denomerator)<0)// Check when exponent is less then zero
 		temp = pow(temp,static_cast<double>(b.denomerator)/b.nomerator*(-1));
 	else 
