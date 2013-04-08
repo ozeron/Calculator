@@ -409,8 +409,7 @@ Number subtraction(Number a,Number b){
 		temp.changeSignum();
 		
 	} else if (b.decimalSystem < 0 && a.decimalSystem!=-1){
-		temp=a;
-		temp.changeSignum();
+		return a;
 	} else {
 		temp.nomerator = a.nomerator*b.denomerator - b.nomerator*a.denomerator;
 		temp.denomerator = a.denomerator*b.denomerator;

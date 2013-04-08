@@ -7,19 +7,39 @@ int cli(FILE* mainio)
 	List<Data> memory;
 	Tree *my;
 	int i = 0;
-	while (buf[0]!='q'){
+	while (strcmp(buf,"q\n")){
 		my = new Tree;
 		
 		fprintf(stdout,"#");
 		fgets(buf,1023,mainio);
-		if (buf[0]=='q')
+		if (!strcmp(buf,"q\n"))
 			continue;
-		if (!strncmp(buf,"h",1)){
+		if (!strncmp(buf,"h\n",2)){
 			printHelp(stdout);
 			continue;
 		}
 		if (!strncmp(buf,"mem",3)){
 			memOut(stdout,memory);
+			continue;
+		}
+		if (!strncmp(buf,"undef",5)){
+			if (buf[5]==' ')
+				undefine(buf+5,memory);
+			continue;
+		}
+		if (!strncmp(buf,"undefine",8)){
+			if (buf[8]==' ')
+				undefine(buf+8,memory);
+			continue;
+		}
+		if (!strncmp(buf,"delete",6)){
+			if (buf[6]==' ')
+				undefine(buf+6,memory);
+			continue;
+		}
+		if (!strncmp(buf,"del",3)){
+			if (buf[3]==' ')
+				undefine(buf+3,memory);
 			continue;
 		}
 		if (buf[0]=='\n'){
@@ -253,7 +273,6 @@ bool improveInput(List<Word> &list)
 
 void CLITEST()
 {
-	undefine("");
 	cli(stdin);
 	Word a('c');
 	Word b;
@@ -291,8 +310,8 @@ void memOut( FILE * out, List<Data> &mem)
 
 void printHelp( FILE * out)
 {
-
 	fprintf(out,"Type exspression in single row, you can use variables,\nthey defined when you first time call variable;\n");
+	fprintf(out,"Variable contain only from Letters.\n");
 	fprintf(out,"\nCalculator support different decimal systems:\nbinary(\"0b\"), oct(\"0\"), dec(standart) and hex(\"0x\")\n");
 	fprintf(out,"\nbinary: 0,1\n");
 	fprintf(out,"oct: 0,1,2,3,4,5,6,7\n");
@@ -300,9 +319,48 @@ void printHelp( FILE * out)
 	fprintf(out,"hex: 0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F\n");
 	fprintf(out,"\nIf you use bigger numbers than have current decimal system,\nit will change current decimal system to the bigger one.\n");
 	fprintf(out,"\nType \"mem\" to see memory state.\n");
-	fprintf(out,"Press \"q\" for exit.\n");
+	fprintf(out,"\nType \"undef\", \"undefine\", \"del\" or \"delete\",\nThen space and names of variables.\nThis command will delete variables from memory.\nFor example: \"undef x\"\n");
+	fprintf(out,"\nPress \"q\" for exit.\n");
 }
 
-void undefine (char* arr)
-{ 
+void undefine (char* arr,List<Data> &mem)
+{
+	char* letter= "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	char *subStr = new char[1024];
+	Word *next;
+	Word::cast type;
+	List<Data>::Node* node;
+	int size = strlen(arr);
+
+	int i=0;
+	while (i<size-1){
+		strcpy(subStr,"");
+		strncat(subStr,arr+i,1);
+		if (strstr(letter,subStr) != nullptr){// find word
+			int j = 0;
+			while (i+j<size-1 && strstr(letter,subStr)!=nullptr) { 
+				j++;
+				strcpy(subStr,"");
+				strncat(subStr,arr+i+j,1);
+			}
+			strcpy(subStr,"");
+			strncat(subStr,arr+i,j);
+			next = new Word (subStr);
+			type = Word::variable;
+			next->setType(type);// add to word
+			node = mem.search(Data(*next));
+			if (node != nullptr){
+				mem.del(node);
+				fprintf(stdout,"Successfully deleted %s.\n",subStr);
+			} else {
+				fprintf(stdout,"%s not found in memory!\n",subStr);
+			}
+			delete next;
+			i+=j;
+			continue;
+		}
+	i++;
+	}
+	
 }
