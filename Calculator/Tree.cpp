@@ -312,8 +312,10 @@ Node * assign_( Node*l,Node*r,List<Data>& var)
 			result = r;
 			if (r->ifHasAssign())
 				mem->data.tree = assign_(r->left,r->right,var);
-			else 
+			else {
 				mem->data.tree = r;
+				r->cutNode();
+			}
 			return mem->data.tree;
 		} else {
 			var.add(l->data);
@@ -338,8 +340,10 @@ Node * assign_( Node*l,Node*r,List<Data>& var)
 			result = r;
 			if (r->ifHasAssign())
 				mem->data.tree = assign_(r->left,r->right,var);
-			else 
+			else{
 				mem->data.tree = r;
+				r->cutNode();
+			}
 			return mem->data.tree;
 		} else {
 			var.add(l->data);
@@ -361,19 +365,21 @@ Node * assign_( Node*l,Node*r,List<Data>& var)
 		if				(memL == nullptr && memR == nullptr){
 			var.add(l->data);
 			var.head->data.tree= r;
-			result = new Node;
-			return result;
+			r->cutNode();
+			return r;
 		} else if (memL != nullptr && memR != nullptr){
 				memL->data.tree = r;
+			r->cutNode();
 			return memL->data.tree;
 		} else if (memL == nullptr && memR != nullptr){
 			var.add(l->data);
 			var.head->data.tree = r;
+			r->cutNode();
 			return var.head->data.tree;
-		} else																				{
+		} else{
 			memL->data.tree = r;
-			result = new Node;
-			return result;
+			r->cutNode();
+			return r;
 		}
 
 		
