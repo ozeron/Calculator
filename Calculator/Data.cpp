@@ -392,8 +392,10 @@ Number plus(Number a,Number b)
 	temp.nomerator = a.nomerator*b.denomerator + b.nomerator*a.denomerator;
 	temp.denomerator = a.denomerator*b.denomerator;
 	gcd = GCD(temp.nomerator, temp.denomerator);
-	temp.nomerator /= gcd;
-	temp.denomerator /= gcd;
+	if (gcd != 0){
+		temp.nomerator /= gcd;
+		temp.denomerator /= gcd;
+	}
 	temp.updateDecimalSystem(a,b);
 	return temp;
 }
@@ -415,12 +417,14 @@ Number subtraction(Number a,Number b){
 		temp.denomerator = a.denomerator*b.denomerator;
 	}
 	gcd = GCD(temp.nomerator, temp.denomerator);
-	temp.nomerator /= gcd;
-	temp.denomerator /= gcd;
+	if (gcd != 0){
+		temp.nomerator /= gcd;
+		temp.denomerator /= gcd;
+	}
 	temp.updateDecimalSystem(a,b);
 	return temp;
 }
-Number production( Number  a,Number  b)
+Number production(Number  a,Number  b)
 {
 	Number temp(0);
 	long long gcd = 0;
@@ -428,13 +432,15 @@ Number production( Number  a,Number  b)
 	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
 	b.nomerator = (b.decimalSystem < 0)? 1 : b.nomerator;
 	b.denomerator = (b.decimalSystem < 0)? 1 : b.denomerator;
-
+	
 
 	temp.nomerator = a.nomerator*b.nomerator;
 	temp.denomerator = a.denomerator*b.denomerator;
 	gcd = GCD(temp.nomerator, temp.denomerator);
-	temp.nomerator /= gcd;
-	temp.denomerator /= gcd;
+	if (gcd != 0){
+		temp.nomerator /= gcd;
+		temp.denomerator /= gcd;
+	}
 	temp.updateDecimalSystem(a,b);
 	return temp;
 }
@@ -444,8 +450,8 @@ Number division(Number a,Number b){
 	if (a.nomerator == 0 && b.nomerator == 0)
 	{
 		temp.setValue(0,1);
-		temp.ifInited = false;
-		temp.decimalSystem = -1;
+		temp.ifInited = true;
+		temp.decimalSystem = 10;
 		return temp;
 	}
 	if (b.nomerator==0){
@@ -456,7 +462,7 @@ Number division(Number a,Number b){
 
 	if (a.ifINF && b.ifINF)
 	{
-		return Number(1,1);
+		return 0;
 	}
 	
 	if (b.ifINF)
@@ -469,8 +475,10 @@ Number division(Number a,Number b){
 	temp.nomerator = a.nomerator*b.denomerator;
 	temp.denomerator = a.denomerator*b.nomerator;
 	gcd = GCD(temp.nomerator, temp.denomerator);
-	temp.nomerator /= gcd;
-	temp.denomerator /= gcd;
+	if (gcd != 0){
+		temp.nomerator /= gcd;
+		temp.denomerator /= gcd;
+	}
 	temp.updateDecimalSystem(a,b);
 	return temp;
 }
@@ -550,7 +558,7 @@ Number remainder(Number a,Number b){
 	a.denomerator = (a.decimalSystem < 0)? 1 : a.denomerator;
 	b.nomerator = (b.decimalSystem < 0)? 1 : b.nomerator;
 	b.denomerator = (b.decimalSystem < 0)? 1 : b.denomerator;
-	if (a.ifINF && b.nomerator==0)
+	if (b.nomerator==0)
 		return a;
 	temp.denomerator = 1;
 	temp.nomerator = (int)(float(a.nomerator/a.denomerator)/float(b.nomerator/b.denomerator));
@@ -586,19 +594,6 @@ Number recLevNOper( Number  a,Number  b, int n)
 
 Number plusINF( Number a,Number b )
 {
-	double l = a.convertToDouble(),r=b.convertToDouble();
-	if (a.ifINF && b.ifINF){
-		if (l>0 && r>0){
-			return a;
-		} else {
-			return Number(0);
-		}
-	}
-	if (a.ifINF && !b.ifINF){
-		return a;
-	}
-	if (!a.ifINF && b.ifINF){
-		return b;
-	}
-
+	a.ifINF = true;
+	return a;
 }

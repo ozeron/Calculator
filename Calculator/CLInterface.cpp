@@ -18,29 +18,33 @@ int cli(FILE* mainio)
 			printHelp(stdout);
 			continue;
 		}
-		if (!strncmp(buf,"mem",3)){
+		if (!strncmp(buf,"mem",3) || buf[4] == '\n' || buf[4] == ' '){
 			memOut(stdout,memory);
 			continue;
 		}
 		if (!strncmp(buf,"undef",5)){
-			if (buf[5]==' ')
+			if (buf[5]==' '){
 				undefine(buf+5,memory);
-			continue;
+				continue;
+			}
 		}
 		if (!strncmp(buf,"undefine",8)){
-			if (buf[8]==' ')
+			if (buf[8]==' '){
 				undefine(buf+8,memory);
-			continue;
+				continue;
+			}
 		}
 		if (!strncmp(buf,"delete",6)){
-			if (buf[6]==' ')
+			if (buf[6]==' '){
 				undefine(buf+6,memory);
-			continue;
+				continue;
+			}
 		}
 		if (!strncmp(buf,"del",3)){
-			if (buf[3]==' ')
+			if (buf[3]==' '){
 				undefine(buf+3,memory);
-			continue;
+				continue;
+			}
 		}
 		if (buf[0]=='\n'){
 			fprintf(stdout,"Empty. Type \"h\" for help.\n");
@@ -206,20 +210,28 @@ bool improveInput(List<Word> &list)
 			size++;
 			i=0;
 		}
+		if (list.at(i)->data.type == Word::variable && list.at(i+1)->data.type == Word::number){
+			list.insertAfter(i,Word("*"));
+			list.at(i+1)->data.setType(Word::cast::delimiter);
+			size++;
+			i=0;
+		}
 		if (list.at(i)->data.type != Word::delimiter && list.at(i+1)->data.type != Word::delimiter){
 			list.insertAfter(i,Word("+"));
 			list.at(i+1)->data.setType(Word::cast::delimiter);
 			size++;
 			i=0;
 		}
-		if (list.at(i)->data.type == Word::cast::number && !strcmp(list.at(i+1)->data.word,"(")){
+		if (list.at(i)->data.type != Word::cast::delimiter && !strcmp(list.at(i+1)->data.word,"(")){
 			list.insertAfter(i,Word("*"));
 			list.at(i+1)->data.setType(Word::cast::delimiter);
+			size++;
 			i=0;
 		}
-		if (!strcmp(list.at(i)->data.word,")") && list.at(i+1)->data.type == Word::cast::number){
+		if (!strcmp(list.at(i)->data.word,")") && list.at(i+1)->data.type != Word::cast::delimiter){
 			list.insertAfter(i,Word("*"));
 			list.at(i+1)->data.setType(Word::cast::delimiter);
+			size++;
 			i=0;
 		}
 		if (!strcmp(list.at(i)->data.word,"-") &&!strcmp(list.at(i+1)->data.word,"-")){
@@ -274,14 +286,6 @@ bool improveInput(List<Word> &list)
 void CLITEST()
 {
 	cli(stdin);
-	Word a('c');
-	Word b;
-	Word c("love");
-	Word d("love",2);
-	Word e =c;
-	Word f =c;
-	List<Word> list;
-
 }
 
 void memOut( FILE * out, List<Data> &mem)
